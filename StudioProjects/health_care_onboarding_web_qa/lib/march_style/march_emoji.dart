@@ -1,0 +1,41 @@
+class MarchEmoji {
+  MarchEmoji._instantiate();
+
+  static final MarchEmoji instance = MarchEmoji._instantiate();
+  static String smiley = '😃';
+  static String smile = '😃';
+  static String happy = '😄';
+  static String grimacing = '😁';
+  static String extraGrimacing = '😆';
+  static String sweatSmile = '😅';
+  static String joy = '😂';
+  static String extraJoy = '🤣';
+  static String happyTear = '🥲';
+  static String relaxed = '☺️';
+  static String blush = '😊';
+  static String innocent = '😇';
+  static String smileFace = '🙂';
+  static String wink = '😉';
+  static String relieved = '😌';
+  static String heartEyes = '😍';
+  static String kissingHeart = '😘';
+  static String starEyes = '🤩';
+  static String happyBirthday = '🥳';
+  static String smirk = '😏';
+  static String unamused = '😒';
+  static String pensive = '😔';
+  static String frowningFace = '☹️';
+  static String cry = '😭';
+  static String angry = '😡';
+  static String flushed = '😳';
+  static String screaming = '😱';
+  static String thinking = '🤔';
+  static String noMouth = '😶';
+  static String neutral = '😐';
+  static String expressionFace = '😑';
+  static String openMouth = '😯';
+  static String sleepy = '😴';
+  static String hungry = '🤤';
+  static String clapping = '👏';
+  static String hundred = '💯';
+}

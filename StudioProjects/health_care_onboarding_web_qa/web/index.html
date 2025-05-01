@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Health Care Onboarding Web QA - A Flutter app for seamless healthcare onboarding and payments.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Health Care Onboarding">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Health Care Onboarding</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Deep link handling for Stripe redirects -->
+  <script>
+    window.addEventListener('load', function() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        const path = window.location.pathname;
+        if (path.includes('/success') || path.includes('/cancel')) {
+          setTimeout(() => {
+            if (window.flutter_inappwebview && typeof window.flutter_inappwebview.callHandler === 'function') {
+              window.flutter_inappwebview.callHandler('handleDeepLink', window.location.href);
+            } else {
+              console.warn('Flutter handler not ready');
+            }
+          }, 1000);
+        }
+      } catch (e) {
+        console.error('Error handling deep link:', e);
+      }
+    });
+  </script>
+</head>
+<body>
+<script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
