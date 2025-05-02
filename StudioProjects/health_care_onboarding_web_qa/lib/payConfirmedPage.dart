@@ -95,9 +95,10 @@ class PayConfirmedPage extends StatelessWidget {
     QuestionaryReqModel model = await getIt.get<QuestionaryRepository>().get();
     final prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('user_id');
+    String? sessionId =  prefs.getString('sessionId');
     QuestionaryReqModel newModel = QuestionaryReqModel(
       userQuestionary: model.userQuestionary,
-      sessionId: model.sessionId,
+      sessionId: sessionId,
       userIdentifier: userId,
     );
 

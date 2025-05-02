@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, ChangeNotifier;
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:html' as html;
 import 'package:url_launcher/url_launcher.dart';
 import '../../injection.dart';
@@ -58,6 +59,8 @@ class PaymentState extends ChangeNotifier {
         _paymentLink = data['data']['paymentLink'];
         _sessionId = data['data']['sessionId'];
       final  model=   await getIt.get<QuestionaryRepository>().get();
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('sessionId',_sessionId??'');
 
         QuestionaryReqModel newModel = QuestionaryReqModel(
           userQuestionary: model.userQuestionary,
