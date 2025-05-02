@@ -22,6 +22,23 @@ class NoEndoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+          child: IgnorePointer(
+            ignoring: true,
+            child: Container(
+              color: Colors.white,
+              child: Image.asset(MarchIcons.hands,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter),
+            ),
+          ),
+        ),
         Scaffold(
           backgroundColor: Colors.white,
           body: SafeArea(
@@ -53,7 +70,12 @@ class NoEndoPage extends StatelessWidget {
                   MarchButton(
                     btnText: 'Get 50% Off and Start Today',
                     btnCallBack: () async {
-
+                      final url = 'https://marchapp.app.link/KRjSXYPbWSb';
+                      if (await canLaunch(url)) {
+                        await launch(url);
+                      } else {
+                        throw 'Could not launch $url';
+                      }
                     },
                     buttonSize: ButtonSize.LARG,
                     alignment: Alignment.center,
@@ -66,20 +88,7 @@ class NoEndoPage extends StatelessWidget {
             ),
           ),
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: 0,
-          child: IgnorePointer(
-            ignoring: true,
-            child: Image.asset(MarchIcons.hands,
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter),
-          ),
-        ),
+
       ],
     );
   }
