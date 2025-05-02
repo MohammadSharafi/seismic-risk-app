@@ -19,7 +19,7 @@ class ChatBotRepositoryImpl implements ChatBotRepository {
 
   @override
   Future<List<MessageChatBot>> getMessages() async {
-    String? messagesJson = _prefs.getString('ChatBotMessages');
+    String? messagesJson = _prefs.getString('ChatBotMessagesDta');
 
     if (messagesJson != null) {
       // Convert JSON string to List<MessageChatBot>
@@ -39,12 +39,12 @@ class ChatBotRepositoryImpl implements ChatBotRepository {
     String messagesJson = json.encode(data.map((e) => e.toJson()).toList());
 
     // Save JSON string to SharedPreferences
-    await _prefs.setString('ChatBotMessages', messagesJson);
+    await _prefs.setString('ChatBotMessagesDta', messagesJson);
   }
 
   @override
   Future<void> reset() async {
     // Remove ChatBotMessages key from SharedPreferences
-    await _prefs.remove('ChatBotMessages');
+    await _prefs.remove('ChatBotMessagesDta');
   }
 }
