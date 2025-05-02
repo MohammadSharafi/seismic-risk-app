@@ -25,8 +25,21 @@ class UnderEighteenPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        IgnorePointer(
+          ignoring: true,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+            ),
+            child: Image.asset(MarchIcons.hands2,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                alignment: Alignment.topCenter),
+          ),
+        ),
         Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
           body: SafeArea(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -89,14 +102,7 @@ class UnderEighteenPage extends StatelessWidget {
             ),
           ),
         ),
-        IgnorePointer(
-          ignoring: true,
-          child: Image.asset(MarchIcons.hands2,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              alignment: Alignment.topCenter),
-        ),
+
       ],
     );
   }

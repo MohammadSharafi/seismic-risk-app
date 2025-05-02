@@ -8,8 +8,9 @@ class QuestionaryReqModel extends HiveObject {
 
   @HiveField(1)
   String ?sessionId;
+  String ?userIdentifier;
 
-  QuestionaryReqModel({this.userQuestionary,this.sessionId});
+  QuestionaryReqModel({this.userQuestionary,this.sessionId, this.userIdentifier});
 
   QuestionaryReqModel.fromJson(Map<String, dynamic> json) {
     if (json['userQuestionary'] != null) {
@@ -19,6 +20,7 @@ class QuestionaryReqModel extends HiveObject {
       });
     }
     sessionId = json['sessionId'];
+    userIdentifier = json['userIdentifier'];
   }
 
   Map<String, dynamic> toJson() {
@@ -27,6 +29,7 @@ class QuestionaryReqModel extends HiveObject {
       data['userQuestionary'] = userQuestionary!.map((v) => v.toJson()).toList();
     }
     data['sessionId'] = sessionId;
+    data['userIdentifier'] = userIdentifier;
 
     return data;
   }

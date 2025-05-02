@@ -250,7 +250,7 @@ class SurveyPage extends StatelessWidget {
               (currentPageData.secondButtonTitle != null)
                   ? Padding(
                       padding: const EdgeInsets.only(top: 12),
-                      child: GestureDetector(
+                      child: InkWell(
                           onTap: () {
                             currentPageData.secondButtonCallBack?.call();
                             surveyState.nextPage();

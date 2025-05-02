@@ -389,7 +389,7 @@ final marchColorData = {
   MarchColor.grey: const Color.fromARGB(255, 91, 91, 103),
   MarchColor.ringSideColor: const Color.fromARGB(255, 238, 238, 238),
   MarchColor.lightGrey: const Color.fromARGB(37, 102, 102, 106),
-  MarchColor.primary: const Color.fromARGB(255, 103, 80, 164),
+  MarchColor.primary: HexColor('#6750A4'),
   MarchColor.errorColor: const Color.fromRGBO(217, 53, 79, 1.0),
   MarchColor.white: const Color.fromRGBO(255, 255, 255, 1.0),
   MarchColor.focusBorder: const Color.fromRGBO(113, 116, 227, 1),

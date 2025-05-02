@@ -16,8 +16,28 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: 0,
+
+          child: IgnorePointer(
+            ignoring: true,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Image.asset(MarchIcons.welcomeCover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter),
+            ),
+          ),
+        ),
         Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
           body: SafeArea(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -62,20 +82,7 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: 0,
-          child: IgnorePointer(
-            ignoring: true,
-            child: Image.asset(MarchIcons.welcomeCover,
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter),
-          ),
-        ),
+
       ],
     );
   }

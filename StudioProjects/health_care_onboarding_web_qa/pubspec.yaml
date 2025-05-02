@@ -31,8 +31,8 @@ dependencies:
   dio_smart_retry: ^6.0.0 # Moved from dev_dependencies
   talker_dio_logger: ^4.0.2 # Moved from dev_dependencies
   url_launcher: ^6.3.0 # Moved from dev_dependencies
-  webview_flutter: ^4.9.0 # Moved from dev_dependencies
   webview_flutter_web: ^0.2.3 # Moved from dev_dependencies
+  webview_flutter:
   universal_html: ^2.2.4 # Moved from dev_dependencies
   http: ^1.2.2 # Moved from dev_dependencies, updated version
   provider: ^6.1.2 # Moved from dev_dependencies
@@ -42,6 +42,7 @@ dependencies:
   hive_flutter: ^1.1.0 # Latest compatible version
   injectable:
   uuid: ^4.4.2
+  web:
 
 dev_dependencies:
   flutter_test:
