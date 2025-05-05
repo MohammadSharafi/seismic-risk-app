@@ -63,7 +63,8 @@ class SurveyPage extends StatelessWidget {
       BuildContext context, SurveyState surveyState, dynamic pageData) {
     if (pageData is SurveyPageData) {
       return _buildSurveyPage(context, surveyState, pageData);
-    } else if (pageData is InfoPage) {
+    }
+    else if (pageData is InfoPage) {
       final currentPageData = surveyState.pages[surveyState.currentPage];
       return Stack(
         children: [
@@ -141,25 +142,25 @@ class SurveyPage extends StatelessWidget {
           left: 0,
           right: 0,
           child: Disable(
-            disabled: !surveyState.areAllQuestionsAnswered(),
+            disabled: !surveyState.areAllQuestionsAnswered() ,
             child: (surveyState.currentPage < surveyState.pages.length - 1)
                 ? MarchButton(
                     btnText: 'Next',
                     btnCallBack: () async {
-                      SharedPreferences prefs =await SharedPreferences.getInstance();
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+
 
                       int? age = prefs.getInt('STEP_2');
 
                       if (age != null && age < 18) {
                         // Add your logic here
                         AutoRouter.of(context).replace(const UnderEighteenRoute());
-                      }else{
+                      } else {
                         if (surveyState.currentPage <
                             surveyState.pages.length - 1) {
                           surveyState.nextPage();
                         }
                       }
-
                     },
                     buttonSize: ButtonSize.LARG,
                     alignment: Alignment.center,
@@ -167,10 +168,8 @@ class SurveyPage extends StatelessWidget {
                 : MarchButton(
                     btnText: 'Next',
                     btnCallBack: () async {
-                      QuestionaryReqModel questionaryReqModel =
-                          surveyState.submitSurvey();
+                      QuestionaryReqModel questionaryReqModel = surveyState.submitSurvey();
                       await questionaryRepository.add(questionaryReqModel);
-
                       AutoRouter.of(context).replace(const ConsentRoute());
                     },
                     buttonSize: ButtonSize.LARG,
@@ -181,7 +180,12 @@ class SurveyPage extends StatelessWidget {
       ],
     );
   }
-
+  bool isEmailValid(String email) {
+    final RegExp emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email.trim());
+  }
   Widget _buildProgressIndicator(SurveyState surveyState) {
     return (surveyState.progressbarPage + 1) <= 18
         ? StepProgressIndicator(
@@ -190,7 +194,6 @@ class SurveyPage extends StatelessWidget {
           )
         : SizedBox(height: MarchSize.littleGap * 6);
   }
-
 
   Widget _buildQuestionList(
       BuildContext context, SurveyState surveyState, SurveyPageData pageData) {
@@ -233,16 +236,12 @@ class SurveyPage extends StatelessWidget {
               MarchButton(
                 btnText: currentPageData.buttonTitle ?? 'Next',
                 btnCallBack: () async {
-
-
-                    if (currentPageData.buttonCallBack != null) {
-                      currentPageData.buttonCallBack?.call();
-                    }
-                    if (surveyState.currentPage <
-                        surveyState.pages.length - 1) {
-                      surveyState.nextPage();
-                    }
-
+                  if (currentPageData.buttonCallBack != null) {
+                    currentPageData.buttonCallBack?.call();
+                  }
+                  if (surveyState.currentPage < surveyState.pages.length - 1) {
+                    surveyState.nextPage();
+                  }
                 },
                 buttonSize: ButtonSize.LARG,
                 alignment: Alignment.center,
@@ -274,11 +273,11 @@ class SurveyPage extends StatelessWidget {
     if (currentPageData.timer != null) {
       Future.delayed(Duration(seconds: currentPageData.timer), () async {
         if (surveyState.currentPage < surveyState.pages.length - 1) {
-          SharedPreferences prefs =await SharedPreferences.getInstance();
+          SharedPreferences prefs = await SharedPreferences.getInstance();
 
           bool? answer = prefs.getBool('STEP_3');
 
-          if (answer==true) {
+          if (answer == true) {
             surveyState.nextPage();
           } else {
             AutoRouter.of(context).replace(NoEndoRoute());
@@ -289,4 +288,19 @@ class SurveyPage extends StatelessWidget {
 
     return currentPageData.child;
   }
+
+  bool isValidEmail(SurveyState surveyState) {
+    bool  isEmail = ((surveyData.where((item) => item is SurveyPageData).cast<SurveyPageData>().toList()[surveyState.myCurrentPageIndex].hintList)??['']).first!.toLowerCase().contains('email');
+    if(!isEmail) {
+      return true;
+    }
+    else if(isEmail && isEmailValid(surveyState.getAnswer(surveyState.myCurrentPageIndex,surveyState.myCurrentQuestionIndex))){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+
 }

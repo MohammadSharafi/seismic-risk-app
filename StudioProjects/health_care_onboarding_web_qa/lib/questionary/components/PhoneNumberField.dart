@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_libphonenumber_platform_interface/flutter_libphonenumber_platform_interface.dart';
 import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
 
-
 class PhoneNumberInputWidget extends StatefulWidget {
   final ValueChanged<String>? onPhoneNumberChanged;
   final String? initialCountry;
@@ -22,7 +21,6 @@ class PhoneNumberInputWidget extends StatefulWidget {
 class _PhoneNumberInputWidgetState extends State<PhoneNumberInputWidget> {
   late final _future = FlutterLibphonenumberPlatform.instance.init();
   final phoneController = TextEditingController();
-  String _placeholderHint = '';
   CountryWithPhoneCode _currentCountry = const CountryWithPhoneCode.us();
 
   @override
@@ -46,9 +44,24 @@ class _PhoneNumberInputWidgetState extends State<PhoneNumberInputWidget> {
 
   void _onPhoneNumberChangedInternal() {
     final phoneNumberWithCountryCode = '+${_currentCountry.phoneCode}${phoneController.text}';
-    widget.onPhoneNumberChanged?.call(phoneNumberWithCountryCode);
+  bool isValid  =isValidPhoneNumber(phoneNumberWithCountryCode);
+    if (isValid) {
+      widget.onPhoneNumberChanged?.call(phoneNumberWithCountryCode.replaceAll(' ', '').replaceAll('-', ''));
+    } else {
+      widget.onPhoneNumberChanged?.call('');
+    }
   }
 
+  // Function to validate phone number
+  bool isValidPhoneNumber(String phoneNumber)  {
+    // Clean the phone number (remove spaces, dashes, etc.)
+    final cleanedNumber = phoneNumber.replaceAll(RegExp(r'[\s-]+'), '');
+
+    // Regex pattern: starts with +, followed by 1-3 digit country code, then 6-14 digits
+    final RegExp phoneRegex = RegExp(r'^\+\d{1,3}\d{6,14}$');
+
+    return phoneRegex.hasMatch(cleanedNumber);
+  }
   Future<void> _setInitialCountry(String countryName) async {
     await _future;
     final country = CountryManager().countries.firstWhere(
@@ -73,10 +86,14 @@ class _PhoneNumberInputWidgetState extends State<PhoneNumberInputWidget> {
           children: [
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: Text('Select Country Code', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text(
+                'Select Country Code',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
-            Expanded(
+            Flexible(
               child: ListView.builder(
+                shrinkWrap: true,
                 itemCount: sortedCountries.length,
                 itemBuilder: (context, index) {
                   final country = sortedCountries[index];
@@ -93,9 +110,10 @@ class _PhoneNumberInputWidgetState extends State<PhoneNumberInputWidget> {
       ),
     );
 
-    if (selectedCountry != null) {
+    if (selectedCountry != null && selectedCountry != _currentCountry) {
       setState(() {
         _currentCountry = selectedCountry;
+        phoneController.clear(); // Clear input when country changes
       });
     }
   }
@@ -121,7 +139,8 @@ class _PhoneNumberInputWidgetState extends State<PhoneNumberInputWidget> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('+${_currentCountry.phoneCode}', style: const TextStyle(fontSize: 16)),
+                      Text('+${_currentCountry.phoneCode}',
+                          style: const TextStyle(fontSize: 16)),
                       const Icon(Icons.arrow_drop_down),
                     ],
                   ),
@@ -133,9 +152,11 @@ class _PhoneNumberInputWidgetState extends State<PhoneNumberInputWidget> {
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    hintText: _placeholderHint,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    hintText: 'Enter phone number',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                   ),
                   inputFormatters: [
                     LibPhonenumberTextFormatter(

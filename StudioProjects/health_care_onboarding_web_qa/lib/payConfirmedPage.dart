@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:auto_route/annotations.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:health_care_onboarding_web_qa/march_style/march_icons.dart';
 import 'package:health_care_onboarding_web_qa/questionary/components/buttons.dart';
 import 'package:health_care_onboarding_web_qa/questionary/models/questionary/QuestionaryReqModel.dart';
 import 'package:health_care_onboarding_web_qa/questionary/models/questionary/questionary_repo.dart';
+import 'package:health_care_onboarding_web_qa/routes/router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -79,7 +81,7 @@ class PayConfirmedPage extends StatelessWidget {
               MarchButton(
                   btnText: 'Schedule Your Onboarding Session',
                   btnCallBack: () async {
-                    sendData();
+                    sendData(context);
                   },
                   buttonSize: ButtonSize.INFINITY,
                   alignment: Alignment.center),
@@ -91,7 +93,7 @@ class PayConfirmedPage extends StatelessWidget {
     );
   }
 
-  Future<void> sendData() async {
+  Future<void> sendData(BuildContext context) async {
     QuestionaryReqModel model = await getIt.get<QuestionaryRepository>().get();
     final prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('user_id');
@@ -116,8 +118,9 @@ class PayConfirmedPage extends StatelessWidget {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          html.window.location.href = 'https://outlook.office.com/bookwithme/user/143098a1ce2f4559b77b436570b92ade@March.health/meetingtype/YveKdn3x60GHNizlEMtmkQ2?anonymous&ismsaljsauthenabled&ep=mcard';
-        });
+          html.window.open('https://outlook.office.com/bookwithme/user/143098a1ce2f4559b77b436570b92ade@March.health/meetingtype/YveKdn3x60GHNizlEMtmkQ2?anonymous&ismsaljsauthenabled&ep=mcard', '_blank');        });
+          AutoRouter.of(context).push(OnboardingConfirmedRoute());
+
       } else {}
     } catch (e) {} finally {}
   }

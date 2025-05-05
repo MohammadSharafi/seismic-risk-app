@@ -131,8 +131,14 @@ class SurveyState extends ChangeNotifier {
   List<SurveyPageData> gatherSurveyPageData(List<dynamic> surveyData) {
     return surveyData.where((item) => item is SurveyPageData).cast<SurveyPageData>().toList();
   }
+
+  int myCurrentPageIndex=0;
+  int myCurrentQuestionIndex=0;
   Future<void> saveAnswer(
       int pageIndex, int questionIndex, dynamic answer) async {
+    myCurrentPageIndex=pageIndex;
+    myCurrentQuestionIndex=questionIndex;
+
     print('Started saving answer');
     surveyAnswer.setAnswer(pageIndex, questionIndex, answer);
 
@@ -173,17 +179,21 @@ class SurveyState extends ChangeNotifier {
     print('Not allowing data collection');
   }
 
-    if (pageIndex == 1) {
+  if (pageIndex == 1) {
       prefs.setInt(
           'STEP_2',
           calculateAgeFromAnswer((answer is DateTime)
               ? (answer).toString().split(' ')[0]
               : answer.toString()));
-    } else if (pageIndex == 2) {
-      prefs.setBool(
-          'STEP_3', answer.toString().toLowerCase() == 'yes' ? true : false);
     }
+  else if (pageIndex == 2) {
+      prefs.setBool('STEP_3', answer.toString().toLowerCase() == 'yes' ? true : false);
+  }
     print('Finished saving answer');
+
+
+
+
 
     notifyListeners();
   }
@@ -191,6 +201,7 @@ class SurveyState extends ChangeNotifier {
   dynamic getAnswer(int pageIndex, int questionIndex) {
     return surveyAnswer.getAnswer(pageIndex, questionIndex);
   }
+
 
   TextEditingController getController(int pageIndex, int questionIndex) {
     final key = '$pageIndex-$questionIndex';

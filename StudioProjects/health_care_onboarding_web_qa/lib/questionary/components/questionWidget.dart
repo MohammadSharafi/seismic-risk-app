@@ -419,6 +419,11 @@ class QuestionWidget extends StatelessWidget {
                 controller.text = phoneNumber;
                 surveyState.saveAnswer(pageIndex, questionIndex, phoneNumber);
               }
+              else {
+                controller.text = phoneNumber;
+                surveyState.saveAnswer(pageIndex, questionIndex, '');
+              }
+
             },
             initialCountry: 'United States', // Optional: set initial country
             initialPhoneNumber: '' //optional set initial phone number
@@ -442,18 +447,18 @@ class QuestionWidget extends StatelessWidget {
     bool isEmailField = hintText?.toLowerCase().contains('email') ?? false;
 
     // Email validation function
-    String? validateEmail(String? value) {
+    bool? validateEmail(String? value) {
       if (value == null || value.isEmpty) {
-        return 'Email is required';
+        return false;
       }
       // Regular expression for email validation
       const emailPattern =
           r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
       final regex = RegExp(emailPattern);
       if (!regex.hasMatch(value)) {
-        return 'Enter a valid email address';
+        return false;
       }
-      return null;
+      return true;
     }
 
     // Use email-specific input formatter if it's an email field
@@ -469,9 +474,23 @@ class QuestionWidget extends StatelessWidget {
       helperText: helperText,
       keyboardType: isEmailField ? TextInputType.emailAddress : keyboardType,
       onChanged: (a) {
-        if (onChange != null) onChange(a);
+        if (onChange != null){
+          if(!isEmailField){
+            onChange(a);
+
+          }
+        else if(validateEmail(a)??false){
+           onChange(a);
+         }
+         else{
+            onChange('');
+         }
+
+
+        }
+
       },
-      validator: isEmailField ? validateEmail : null, // Add email validator
+
       errorColor: errorColor,
       maxLine: maxLine ?? 1,
       suffixIconWidget: isLoading
