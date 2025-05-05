@@ -1,5 +1,4 @@
 # Makefile for deploying Flutter web app to GitHub Pages
-
 # Update These Variables
 BASE_HREF = '/'
 GITHUB_REPO = git@github.com:Marchhealth/endomastercare-march-health.git
