@@ -2,12 +2,12 @@
 
 # Update These Variables
 BASE_HREF = '/'
-GITHUB_REPO = git@github.com:Marchhealth/march-endo_master_care_sub.git
+GITHUB_REPO = git@github.com:Marchhealth/endomastercare-march-health.git
 BUILD_VERSION := $(shell grep 'version:' pubspec.yaml | awk '{print $$2}')
-#CUSTOM_DOMAIN = www.marchhealth.co
+//CUSTOM_DOMAIN = www.marchhealth.co
 
 deploy-web:
-	@echo "Cleaning existing repository..."
+	@echo "Clean existing repository..."
 	flutter clean
 
 	@echo "Getting packages..."
@@ -15,25 +15,25 @@ deploy-web:
 
 	@echo "Building for web..."
 	flutter build web --base-href $(BASE_HREF) --release
-
-	#@echo "Creating CNAME file..."
-	#echo "$(CUSTOM_DOMAIN)" > build/web/CNAME
-
-	@echo "Committing changes to main repository..."
+#endomastercare.march-health.com
+#	@echo "Creating CNAME file..."
+#	echo "$(CUSTOM_DOMAIN)" > build/web/CNAME
+	@echo "PUSH & COMMIT"
 	git add . && \
-	git commit -m "Deploy Version $(BUILD_VERSION)" || echo "Nothing to commit" && \
-	git push origin main || { echo "Failed to push to main branch"; exit 1; }
+	git commit -m "Deploy Version $(BUILD_VERSION)" && \
+	git push -u --force origin main
 
-	@echo "Deploying to GitHub Pages (gh-pages branch)..."
+
+	@echo "Deploying to git repository"
 	cd build/web && \
-	rm -rf .git || echo "No .git directory to remove" && \
 	git init && \
 	git add . && \
 	git commit -m "Deploy Version $(BUILD_VERSION)" && \
-	git branch -M gh-pages && \
+	git branch -M main && \
 	git remote add origin $(GITHUB_REPO) && \
-	git push -u origin gh-pages || { echo "Failed to push to gh-pages branch"; exit 1; }
+	git push -u --force origin main
 
+	cd ../..
 	@echo "🟢 Finished Deploy"
 
 .PHONY: deploy-web
