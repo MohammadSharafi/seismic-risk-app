@@ -1,0 +1,23 @@
+package com.seismicrisk.model;
+
+enum BuildingUsage {
+    RESIDENTIAL, COMMERCIAL, MIXED, PUBLIC, INDUSTRIAL
+}
+
+enum PrimaryStructureType {
+    RC_FRAME, RC_SHEAR_WALL, MASONRY_UNREINFORCED, MASONRY_REINFORCED,
+    STEEL_FRAME, TIMBER, PRECAST_CONCRETE, MIXED, UNKNOWN
+}
+
+enum FoundationType {
+    SHALLOW_SPREAD_FOOTING, RAFT_MAT, PILE_FOUNDATION, MIXED, UNKNOWN
+}
+
+enum WallMaterial {
+    BRICK, STONE, CONCRETE_BLOCK, POURED_IN_PLACE_CONCRETE, TIMBER
+}
+
+enum SoilClass {
+    A, B, C, D, E
+}
+
