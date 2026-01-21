@@ -1,0 +1,2100 @@
+import 'package:flutter/material.dart';
+import '../../domain/entities/patient.dart';
+import '../../domain/entities/medication.dart';
+import '../../domain/entities/procedure.dart';
+import '../../domain/entities/clinical_action.dart';
+import '../../domain/entities/visit.dart' show EvidenceReference;
+import '../../domain/value_objects/risk_tier.dart';
+import '../widgets/risk_badge.dart';
+import '../widgets/evidence_chip.dart';
+import '../widgets/medication_card.dart';
+import '../widgets/procedure_card.dart';
+import '../theme/app_theme.dart';
+import '../theme/tailwind_spacing.dart';
+import '../utils/lucide_icons.dart';
+import '../utils/svg_icons.dart';
+
+class VisitAnalysisFlowPage extends StatefulWidget {
+  final Patient patient;
+
+  const VisitAnalysisFlowPage({
+    super.key,
+    required this.patient,
+  });
+
+  @override
+  State<VisitAnalysisFlowPage> createState() => _VisitAnalysisFlowPageState();
+}
+
+class _VisitAnalysisFlowPageState extends State<VisitAnalysisFlowPage> {
+  int _currentStep = 1;
+  String _flowStatus = 'not-started'; // not-started, in-progress, completed
+  bool _analysisRun = false;
+  RiskTier? _aiRecommendationRiskTier;
+  List<String>? _aiReasoning;
+  List<EvidenceReference>? _aiEvidenceReferences;
+  RiskTier _selectedRiskTier = RiskTier.high;
+  String _clinicalNotes = '';
+  bool _discussionReferenced = false;
+
+  // Medications state
+  List<Medication> _medications = [];
+  String? _editingMedicationId;
+  Medication? _medicationEditForm;
+  bool _addingMedication = false;
+  String? _deleteConfirmMedicationId;
+
+  // Procedures state
+  List<Procedure> _procedures = [];
+  String? _editingProcedureId;
+  Procedure? _procedureEditForm;
+  bool _addingProcedure = false;
+  String? _deleteConfirmProcedureId;
+
+  // Clinical Actions state
+  List<ClinicalAction> _clinicalActions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeMockData();
+  }
+
+  void _initializeMockData() {
+    // Initialize mock medications
+    _medications = [
+      Medication(
+        id: '1',
+        name: 'Lisinopril',
+        dose: 'Increase to 20 mg',
+        route: 'oral',
+        frequency: 'daily',
+        duration: 'Ongoing',
+        rationale: 'Persistent SBP above target range',
+        evidenceReferences: [
+          const EvidenceReference(
+              type: 'Vitals', label: 'BP 152/94 (Jan 8, 10:45)'),
+          const EvidenceReference(
+              type: 'Condition', label: 'CKD Stage 3 (Active)'),
+        ],
+        source: MedicationSource.aiProposed,
+        status: MedicationStatus.planned,
+      ),
+    ];
+
+    // Initialize mock procedures
+    _procedures = [
+      Procedure(
+        id: '1',
+        name: 'Order BMP',
+        timing: 'In 7 days',
+        rationale: 'Monitor renal function after dose adjustment',
+        evidenceReferences: [
+          const EvidenceReference(
+              type: 'Lab', label: 'Creatinine 1.3 mg/dL (Jan 5)'),
+          const EvidenceReference(
+              type: 'Medication', label: 'Lisinopril dose increase'),
+        ],
+        source: ProcedureSource.aiProposed,
+        status: ProcedureStatus.planned,
+      ),
+      Procedure(
+        id: '2',
+        name: 'Schedule follow-up visit',
+        timing: 'In 2 weeks',
+        rationale: 'Reassess BP response to medication adjustment',
+        evidenceReferences: [
+          const EvidenceReference(
+              type: 'Vitals', label: 'BP 152/94 (Jan 8, 10:45)'),
+          const EvidenceReference(
+              type: 'Medication', label: 'Recent dose change'),
+        ],
+        source: ProcedureSource.aiProposed,
+        status: ProcedureStatus.planned,
+      ),
+    ];
+
+    // Initialize mock AI evidence references
+    _aiEvidenceReferences = [
+      const EvidenceReference(
+          type: 'Vitals', label: 'BP 152/94 (Jan 8, 10:45)'),
+      const EvidenceReference(type: 'Vitals', label: 'HR 78 (Jan 8, 10:45)'),
+      const EvidenceReference(
+          type: 'Lab', label: 'Creatinine 1.3 mg/dL (Jan 5)'),
+      const EvidenceReference(
+          type: 'Medication', label: 'Metformin 1000mg BID (Active)'),
+      const EvidenceReference(
+          type: 'Encounter', label: 'Encounter: Jan 8 – Manual visit'),
+    ];
+  }
+
+  void _handleRunAnalysis() {
+    setState(() {
+      _analysisRun = true;
+      _flowStatus = 'in-progress';
+      _currentStep = 2;
+      _aiRecommendationRiskTier = widget.patient.riskTier;
+      _aiReasoning = [
+        'Multiple high-risk comorbidities detected',
+        'Elevated blood pressure above target range',
+        'Medication interaction risk identified',
+      ];
+    });
+  }
+
+  // Medication handlers
+  void _handleEditMedication(String id) {
+    final medication = _medications.firstWhere((m) => m.id == id);
+    setState(() {
+      _editingMedicationId = id;
+      _medicationEditForm = medication;
+      _addingMedication = false;
+    });
+  }
+
+  void _handleSaveMedication(Medication medication) {
+    setState(() {
+      _medications = _medications.map((m) {
+        return m.id == _editingMedicationId ? medication : m;
+      }).toList();
+      _editingMedicationId = null;
+      _medicationEditForm = null;
+    });
+  }
+
+  void _handleCancelMedicationEdit() {
+    setState(() {
+      _editingMedicationId = null;
+      _medicationEditForm = null;
+      _addingMedication = false;
+    });
+  }
+
+  void _handleDeleteMedication(String id) {
+    setState(() {
+      _deleteConfirmMedicationId = id;
+    });
+  }
+
+  void _handleConfirmDeleteMedication() {
+    if (_deleteConfirmMedicationId != null) {
+      setState(() {
+        _medications = _medications
+            .where((m) => m.id != _deleteConfirmMedicationId)
+            .toList();
+        _deleteConfirmMedicationId = null;
+      });
+    }
+  }
+
+  void _handleCancelDeleteMedication() {
+    setState(() {
+      _deleteConfirmMedicationId = null;
+    });
+  }
+
+  void _handleAddMedication() {
+    setState(() {
+      _addingMedication = true;
+      _editingMedicationId = null;
+      _medicationEditForm = Medication(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: '',
+        dose: '',
+        route: '',
+        frequency: '',
+        rationale: '',
+        evidenceReferences: [],
+        source: MedicationSource.clinicianAdded,
+        status: MedicationStatus.planned,
+      );
+    });
+  }
+
+  void _handleSaveNewMedication(Medication medication) {
+    setState(() {
+      _medications = [..._medications, medication];
+      _addingMedication = false;
+      _medicationEditForm = null;
+    });
+  }
+
+  // Procedure handlers
+  void _handleEditProcedure(String id) {
+    final procedure = _procedures.firstWhere((p) => p.id == id);
+    setState(() {
+      _editingProcedureId = id;
+      _procedureEditForm = procedure;
+      _addingProcedure = false;
+    });
+  }
+
+  void _handleSaveProcedure(Procedure procedure) {
+    setState(() {
+      _procedures = _procedures.map((p) {
+        return p.id == _editingProcedureId ? procedure : p;
+      }).toList();
+      _editingProcedureId = null;
+      _procedureEditForm = null;
+    });
+  }
+
+  void _handleCancelProcedureEdit() {
+    setState(() {
+      _editingProcedureId = null;
+      _procedureEditForm = null;
+      _addingProcedure = false;
+    });
+  }
+
+  void _handleDeleteProcedure(String id) {
+    setState(() {
+      _deleteConfirmProcedureId = id;
+    });
+  }
+
+  void _handleConfirmDeleteProcedure() {
+    if (_deleteConfirmProcedureId != null) {
+      setState(() {
+        _procedures = _procedures
+            .where((p) => p.id != _deleteConfirmProcedureId)
+            .toList();
+        _deleteConfirmProcedureId = null;
+      });
+    }
+  }
+
+  void _handleCancelDeleteProcedure() {
+    setState(() {
+      _deleteConfirmProcedureId = null;
+    });
+  }
+
+  void _handleAddProcedure() {
+    setState(() {
+      _addingProcedure = true;
+      _editingProcedureId = null;
+      _procedureEditForm = Procedure(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: '',
+        timing: '',
+        rationale: '',
+        evidenceReferences: [],
+        source: ProcedureSource.clinicianAdded,
+        status: ProcedureStatus.planned,
+      );
+    });
+  }
+
+  void _handleSaveNewProcedure(Procedure procedure) {
+    setState(() {
+      _procedures = [..._procedures, procedure];
+      _addingProcedure = false;
+      _procedureEditForm = null;
+    });
+  }
+
+  void _handleToggleMedicationStatus(String id) {
+    setState(() {
+      _medications = _medications.map((m) {
+        if (m.id == id) {
+          return m.copyWith(
+            status: m.status == MedicationStatus.planned
+                ? MedicationStatus.notPlanned
+                : MedicationStatus.planned,
+          );
+        }
+        return m;
+      }).toList();
+    });
+  }
+
+  void _handleToggleProcedureStatus(String id) {
+    setState(() {
+      _procedures = _procedures.map((p) {
+        if (p.id == id) {
+          return p.copyWith(
+            status: p.status == ProcedureStatus.planned
+                ? ProcedureStatus.notPlanned
+                : ProcedureStatus.planned,
+          );
+        }
+        return p;
+      }).toList();
+    });
+  }
+
+  void _handleReviewAI() {
+    setState(() {
+      _currentStep = 3;
+    });
+  }
+
+  void _handleApproveDecision() {
+    setState(() {
+      _currentStep = 4;
+      _flowStatus = 'completed';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildVisitTrigger(),
+          _buildProgressIndicator(),
+          const SizedBox(height: 12), // mb-3 (further reduced)
+          _buildStepContent(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVisitTrigger() {
+    return Container(
+      padding: const EdgeInsets.all(TailwindSpacing.p3), // p-3
+      margin: EdgeInsets.only(
+          bottom: TailwindSpacing.mb3), // mb-3 (reduced from mb-4)
+      decoration: BoxDecoration(
+        color: AppTheme.gray50, // bg-gray-50
+        border: Border.all(color: AppTheme.gray200), // border border-gray-200
+        borderRadius:
+            BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Text(
+                'VISIT TRIGGER',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textXs, // text-xs = 12px
+                  fontWeight: FontWeight.w600, // font-medium
+                  color: AppTheme.gray500, // text-gray-500
+                  letterSpacing:
+                      0.025 * 12, // tracking-wide = 0.025em (0.3px for 12px)
+                  height: 1.5, // line-height: 1.5
+                ),
+              ),
+              SizedBox(width: TailwindSpacing.gap4 + 4), // gap-3 (12px)
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10, // px-2.5 (0.625rem = 10px)
+                      vertical: TailwindSpacing.p1, // py-1
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.blue100, // bg-blue-100
+                      borderRadius: BorderRadius.circular(
+                          TailwindRadius.rounded), // rounded
+                    ),
+                    child: const Text(
+                      'Background Monitoring Alert',
+                      style: TextStyle(
+                        fontSize: TailwindFontSize.textSm, // text-sm
+                        fontWeight: FontWeight.w600, // font-medium
+                        color: AppTheme.blue800, // text-blue-800
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: TailwindSpacing.gap2), // gap-2
+                  const Text('•',
+                      style: TextStyle(
+                          color: AppTheme.gray500,
+                          fontSize: TailwindFontSize.textXs)),
+                  SizedBox(width: TailwindSpacing.gap2),
+                  RichText(
+                    text: const TextSpan(
+                      style: TextStyle(
+                          fontSize: TailwindFontSize.textXs,
+                          color: AppTheme.gray600),
+                      children: [
+                        TextSpan(text: 'Source: '),
+                        TextSpan(
+                          text: 'AI',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: TailwindSpacing.gap2),
+                  const Text('•',
+                      style: TextStyle(
+                          color: AppTheme.gray500,
+                          fontSize: TailwindFontSize.textXs)),
+                  SizedBox(width: TailwindSpacing.gap2),
+                  const Text(
+                    'Jan 8, 2026 09:15 AM',
+                    style: TextStyle(
+                        fontSize: TailwindFontSize.textXs,
+                        color: AppTheme.gray600),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressIndicator() {
+    return Container(
+      padding:
+          const EdgeInsets.all(TailwindSpacing.p4), // p-4 (reduced from p-6)
+      margin: EdgeInsets.only(
+          bottom: TailwindSpacing.mb4), // mb-4 (reduced from mb-6)
+      decoration: BoxDecoration(
+        color: Colors.white, // bg-white
+        border: Border.all(color: AppTheme.gray200), // border border-gray-200
+        borderRadius:
+            BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Clinical Workflow Progress',
+                    style: TextStyle(
+                      fontSize: TailwindFontSize
+                          .textLg, // font-semibold (default h3 size)
+                      fontWeight: FontWeight.w600, // font-semibold
+                      color: AppTheme.gray900,
+                    ),
+                  ),
+                  SizedBox(height: TailwindSpacing.mb1), // mb-1
+                  Text(
+                    'Step $_currentStep of 4',
+                    style: const TextStyle(
+                      fontSize: TailwindFontSize.textSm, // text-sm
+                      color: AppTheme.gray600, // text-gray-600
+                    ),
+                  ),
+                ],
+              ),
+              _buildStatusBadge(),
+            ],
+          ),
+          SizedBox(height: TailwindSpacing.mb3), // mb-3 (further reduced)
+          _buildStepIndicators(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge() {
+    Color bgColor;
+    Color textColor;
+    String text;
+    Widget? icon;
+
+    switch (_flowStatus) {
+      case 'not-started':
+        bgColor = AppTheme.gray100;
+        textColor = AppTheme.gray700;
+        text = 'Not Started';
+        break;
+      case 'in-progress':
+        bgColor = AppTheme.blue100;
+        textColor = AppTheme.blue700;
+        text = 'In Progress';
+        icon = TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.3, end: 1.0),
+          duration: const Duration(milliseconds: 1000),
+          curve: Curves.easeInOut,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Container(
+                width: 8, // w-2
+                height: 8, // h-2
+                decoration: const BoxDecoration(
+                  color: AppTheme.blue600, // bg-blue-500
+                  shape: BoxShape.circle,
+                ),
+              ),
+            );
+          },
+          onEnd: () {
+            if (mounted && _flowStatus == 'in-progress') {
+              setState(() {}); // Restart animation
+            }
+          },
+        );
+        break;
+      case 'completed':
+        bgColor = AppTheme.green100;
+        textColor = AppTheme.green700;
+        text = 'Completed';
+        icon = const Icon(LucideIcons.checkCircle,
+            size: 14, color: AppTheme.green600); // w-3.5 h-3.5 = 14px
+        break;
+      default:
+        bgColor = AppTheme.gray100;
+        textColor = AppTheme.gray700;
+        text = 'Unknown';
+    }
+
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 4), // px-3 py-1
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(999), // rounded-full
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            icon,
+            const SizedBox(width: 6), // gap-1.5 = 6px
+          ],
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: TailwindFontSize.textSm, // text-sm = 14px
+              fontWeight: FontWeight.w600, // font-medium
+              color: textColor,
+              height: 1.5,
+              letterSpacing: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepIndicators() {
+    final steps = [
+      (1, 'Review Patient State', 'Current clinical data'),
+      (2, 'AI Clinical Assessment', 'Assistive analysis'),
+      (3, 'Doctor Clinical Decision', 'Clinician judgment'),
+      (4, 'Decision Finalized', 'Confirmed & documented'),
+    ];
+
+    return Row(
+      children: steps.asMap().entries.map((entry) {
+        final index = entry.key;
+        final (number, label, description) = entry.value;
+        final isActive = _currentStep == number;
+        final isCompleted = _currentStep > number;
+
+        return Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    Container(
+                      width: TailwindSize.w10, // w-10
+                      height: TailwindSize.h10, // h-10
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? AppTheme.green600 // bg-green-500
+                            : isActive
+                                ? AppTheme.blue600 // bg-blue-500
+                                : AppTheme.gray200, // bg-gray-200
+                        shape: BoxShape.circle, // rounded-full
+                      ),
+                      child: isCompleted
+                          ? const Icon(LucideIcons.checkCircle,
+                              color: Colors.white, size: 20) // w-5 h-5 = 20px
+                          : Center(
+                              child: Text(
+                                '$number',
+                                style: TextStyle(
+                                  fontSize: TailwindFontSize.textSm, // text-sm
+                                  fontWeight: FontWeight.w600, // font-medium
+                                  color: isActive
+                                      ? Colors.white
+                                      : AppTheme.gray500,
+                                ),
+                              ),
+                            ),
+                    ),
+                    SizedBox(height: TailwindSpacing.mb2), // mb-2
+                    SizedBox(
+                      width: 120, // max-w-[120px]
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: TailwindFontSize.textXs, // text-xs
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.normal, // font-medium when active
+                          color: isActive ? AppTheme.gray900 : AppTheme.gray600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: TailwindSpacing.mt05), // mt-0.5
+                    SizedBox(
+                      width: 120,
+                      child: Text(
+                        description,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: TailwindFontSize.textXs, // text-xs
+                          color: AppTheme.gray500, // text-gray-500
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (index < steps.length - 1)
+                Expanded(
+                  child: Container(
+                    height: TailwindSize.h05, // h-0.5
+                    margin: EdgeInsets.symmetric(
+                        horizontal: TailwindSpacing.gap2), // mx-2
+                    color: isCompleted ? AppTheme.green600 : AppTheme.gray200,
+                  ),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildStepContent() {
+    return Container(
+      padding:
+          const EdgeInsets.all(TailwindSpacing.p4), // p-4 (reduced from p-6)
+      margin: EdgeInsets.only(
+          bottom: TailwindSpacing.mb4), // mb-4 (reduced from mb-6)
+      decoration: BoxDecoration(
+        color: Colors.white, // bg-white
+        border: Border.all(color: AppTheme.gray200), // border border-gray-200
+        borderRadius:
+            BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+      ),
+      child: _getStepContent(),
+    );
+  }
+
+  Widget _getStepContent() {
+    switch (_currentStep) {
+      case 1:
+        return _buildStep1();
+      case 2:
+        if (!_analysisRun || _aiRecommendationRiskTier == null) {
+          return _buildStep2Loading();
+        }
+        return _buildStep2Results();
+      case 3:
+        return _buildStep3();
+      case 4:
+        return _buildStep4();
+      default:
+        return const SizedBox();
+    }
+  }
+
+  Widget _buildStep1() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Step 1: Patient State',
+              style: TextStyle(
+                fontSize: TailwindFontSize.textLg, // font-semibold (h3 default)
+                fontWeight: FontWeight.w600, // font-semibold
+                color: AppTheme.gray900,
+                height: 1.5,
+                letterSpacing: 0,
+              ),
+            ),
+            SizedBox(height: TailwindSpacing.mb1), // mb-1
+            const Text(
+              'Snapshot of current problems, medications, and latest vitals.',
+              style: TextStyle(
+                fontSize: TailwindFontSize.textSm, // text-sm
+                color: AppTheme.gray600, // text-gray-600
+                height: 1.5,
+                letterSpacing: 0,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: TailwindSpacing.mb2), // mb-2 (further reduced)
+        _buildPatientStateCard(),
+        SizedBox(height: TailwindSpacing.mb3), // mb-3 (further reduced)
+        SizedBox(
+          width: double.infinity,
+          child: Material(
+            color: AppTheme.blue600, // bg-blue-600
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+            child: InkWell(
+              onTap: _handleRunAnalysis,
+              borderRadius: BorderRadius.circular(TailwindRadius.roundedLg),
+              onTapDown: (_) => setState(() {}),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TailwindSpacing.p6, // px-6
+                  vertical: TailwindSpacing.p3, // py-3
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(TailwindRadius.roundedLg),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(LucideIcons.brain,
+                        size: 20, color: Colors.white), // w-5 h-5
+                    const SizedBox(width: TailwindSpacing.gap2), // gap-2
+                    const Text(
+                      'Run AI Analysis',
+                      style: TextStyle(
+                        fontSize:
+                            TailwindFontSize.textSm, // text-sm = 14px (reduced)
+                        fontWeight:
+                            FontWeight.w500, // font-medium (reduced from w600)
+                        color: Colors.white,
+                        height: 1.5,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    const SizedBox(width: TailwindSpacing.gap2), // gap-2
+                    const Icon(LucideIcons.arrowRight,
+                        size: 20, color: Colors.white), // w-5 h-5
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPatientStateCard() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(
+              TailwindSpacing.p3), // p-3 (reduced from p-4)
+          decoration: BoxDecoration(
+            color: AppTheme.gray50, // bg-gray-50
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Current Status',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                  fontWeight: FontWeight.w500, // font-medium (matching React)
+                  color: AppTheme.gray700,
+                  height: 1.5,
+                  letterSpacing: 0,
+                ),
+              ),
+              SizedBox(height: TailwindSpacing.mb2), // mb-2 (matching React)
+              Row(
+                children: [
+                  RiskBadge(tier: widget.patient.riskTier, size: BadgeSize.md),
+                  SizedBox(
+                      width:
+                          TailwindSpacing.gap3), // gap-3 (12px, matching React)
+                  Text(
+                    'Last evaluation: ${widget.patient.lastEvaluation}',
+                    style: const TextStyle(
+                      fontSize: TailwindFontSize.textSm,
+                      color: AppTheme.gray600,
+                      height: 1.5,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: TailwindSpacing.mb2), // mb-2 (further reduced)
+        Container(
+          padding: const EdgeInsets.all(
+              TailwindSpacing.p3), // p-3 (reduced from p-4)
+          decoration: BoxDecoration(
+            color: AppTheme.gray50, // bg-gray-50
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Key Clinical Indicators',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm
+                  fontWeight: FontWeight.w500, // font-medium (matching React)
+                  color: AppTheme.gray700,
+                  height: 1.5,
+                  letterSpacing: 0,
+                ),
+              ),
+              SizedBox(height: TailwindSpacing.mb2), // mb-2 (matching React)
+              Row(
+                children: [
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                          color: AppTheme.gray500,
+                          height: 1.5,
+                          letterSpacing: 0,
+                        ),
+                        children: [
+                          const TextSpan(text: 'Conditions: '),
+                          TextSpan(
+                            text: '${widget.patient.conditions.length} active',
+                            style: const TextStyle(color: AppTheme.gray900),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                          color: AppTheme.gray500,
+                          height: 1.5,
+                          letterSpacing: 0,
+                        ),
+                        children: [
+                          const TextSpan(text: 'Medications: '),
+                          TextSpan(
+                            text:
+                                '${widget.patient.medications.length} current',
+                            style: const TextStyle(color: AppTheme.gray900),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (widget.patient.vitals != null) ...[
+                SizedBox(height: TailwindSpacing.gap2), // gap-2
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'BP: ${widget.patient.vitals!.bloodPressure}',
+                        style: const TextStyle(
+                          fontSize: TailwindFontSize.textSm,
+                          color: AppTheme.gray900,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'HR: ${widget.patient.vitals!.heartRate}',
+                        style: const TextStyle(
+                          fontSize: TailwindFontSize.textSm,
+                          color: AppTheme.gray900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+        SizedBox(height: TailwindSpacing.mb4), // space-y-4
+        Container(
+          padding: const EdgeInsets.all(
+              TailwindSpacing.p3), // p-3 (reduced from p-4)
+          decoration: BoxDecoration(
+            color: AppTheme.blue50, // bg-blue-50
+            border:
+                Border.all(color: AppTheme.blue200), // border border-blue-200
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Ready to proceed',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                  fontWeight: FontWeight.w500, // font-medium (matching React)
+                  color: AppTheme.blue900,
+                  height: 1.5,
+                  letterSpacing: 0,
+                ),
+              ),
+              SizedBox(height: TailwindSpacing.mb1), // mb-1 (matching React)
+              const Text(
+                'Patient data is current and complete. You may proceed to AI analysis.',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                  color: AppTheme.blue800, // text-blue-800
+                  height: 1.5,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStep2Loading() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 48), // py-12
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 64, // w-16
+              height: 64, // h-16
+              decoration: BoxDecoration(
+                color: AppTheme.purple100, // bg-purple-100
+                shape: BoxShape.circle, // rounded-full
+              ),
+              child: const Icon(
+                LucideIcons.brain,
+                size: 32, // w-8 h-8
+                color: AppTheme.purple600,
+              ),
+            ),
+            SizedBox(height: TailwindSpacing.mb2), // mb-2 (further reduced)
+            const Text(
+              'AI Analysis in Progress',
+              style: TextStyle(
+                fontSize: TailwindFontSize.textLg, // text-lg = 18px
+                fontWeight: FontWeight.w600, // font-semibold
+                color: AppTheme.gray900,
+              ),
+            ),
+            SizedBox(height: TailwindSpacing.mb2), // mb-2
+            Text(
+              'Analyzing patient data and generating assessment...',
+              style: TextStyle(
+                fontSize: TailwindFontSize.textBase, // text-base
+                color: AppTheme.gray600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStep2Results() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(LucideIcons.brain,
+                color: AppTheme.purple600, size: 20), // w-5 h-5 = 20px
+            const SizedBox(width: 8),
+            const Text(
+              'Step 2: AI Clinical Assessment',
+              style: TextStyle(
+                fontSize: TailwindFontSize.textLg, // text-lg = 18px
+                fontWeight: FontWeight.w600,
+                color: AppTheme.gray900,
+                height: 1.5, // line-height: 1.5
+                letterSpacing: 0,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppTheme.purple100,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                'Assistive',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textXs, // text-xs = 12px
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.purple700,
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: TailwindSpacing.mb1), // mb-1
+        Padding(
+          padding: const EdgeInsets.only(left: 28), // ml-7 (7 * 4px = 28px)
+          child: const Text(
+            'AI-generated assessment for clinical review',
+            style: TextStyle(
+              fontSize: TailwindFontSize.textSm, // text-sm
+              fontStyle: FontStyle.italic,
+              color: AppTheme.gray600, // text-gray-600
+            ),
+          ),
+        ),
+        SizedBox(height: TailwindSpacing.mb3), // mb-3 (further reduced)
+        Container(
+          padding: const EdgeInsets.all(
+              TailwindSpacing.p3), // p-3 (reduced from p-4)
+          decoration: BoxDecoration(
+            color: AppTheme.purple50, // bg-purple-50
+            border: Border.all(
+                color: AppTheme.purple200), // border border-purple-200
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'AI-Suggested Risk Tier',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm
+                  fontWeight: FontWeight.w600, // font-medium
+                  color: AppTheme.gray700,
+                ),
+              ),
+              SizedBox(height: TailwindSpacing.mb3), // mb-3
+              RiskBadge(
+                tier: _aiRecommendationRiskTier!,
+                size: BadgeSize.lg,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: TailwindSpacing.mb4), // mb-4
+        Container(
+          padding: const EdgeInsets.all(
+              TailwindSpacing.p3), // p-3 (reduced from p-4)
+          decoration: BoxDecoration(
+            color: AppTheme.gray50, // bg-gray-50
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Clinical Reasoning',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm
+                  fontWeight: FontWeight.w600, // font-medium
+                  color: AppTheme.gray700,
+                ),
+              ),
+              SizedBox(height: TailwindSpacing.mb3), // mb-3
+              ...(_aiReasoning ?? []).map((reason) => Padding(
+                    padding: EdgeInsets.only(
+                        bottom: TailwindSpacing.gap2), // space-y-2
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 6, // w-1.5
+                          height: 6, // h-1.5
+                          margin: EdgeInsets.only(
+                            top: 6, // mt-1.5
+                            right: TailwindSpacing.gap2, // gap-2
+                          ),
+                          decoration: const BoxDecoration(
+                            color: AppTheme.purple600, // bg-purple-500
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            reason,
+                            style: const TextStyle(
+                              fontSize: TailwindFontSize.textSm, // text-sm
+                              color: AppTheme.gray700, // text-gray-700
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+          ),
+        ),
+        SizedBox(height: TailwindSpacing.mb4), // mb-4
+        Container(
+          padding: const EdgeInsets.all(
+              TailwindSpacing.p3), // p-3 (reduced from p-4)
+          decoration: BoxDecoration(
+            color: AppTheme.blue50, // bg-blue-50
+            border:
+                Border.all(color: AppTheme.blue200), // border border-blue-200
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'AI model: ClinicalAI v3.2.1',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                  fontWeight: FontWeight.w600, // font-medium
+                  color: AppTheme.blue900,
+                  height: 1.5,
+                  letterSpacing: 0,
+                ),
+              ),
+              SizedBox(height: TailwindSpacing.mb1), // mb-1
+              Text(
+                'Analysis timestamp: ${DateTime.now().toString().substring(0, 19)}',
+                style: const TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                  color: AppTheme.blue800, // text-blue-800
+                  height: 1.5,
+                  letterSpacing: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: TailwindSpacing.mb4), // mb-4
+        SizedBox(
+          width: double.infinity,
+          child: Material(
+            color: AppTheme.blue600, // bg-blue-600
+            borderRadius:
+                BorderRadius.circular(TailwindRadius.roundedLg), // rounded-lg
+            child: InkWell(
+              onTap: _handleReviewAI,
+              borderRadius: BorderRadius.circular(TailwindRadius.roundedLg),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TailwindSpacing.p6, // px-6
+                  vertical: TailwindSpacing.p3, // py-3
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(TailwindRadius.roundedLg),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Proceed to Clinical Review',
+                      style: TextStyle(
+                        fontSize:
+                            TailwindFontSize.textSm, // text-sm = 14px (reduced)
+                        fontWeight:
+                            FontWeight.w500, // font-medium (reduced from w600)
+                        color: Colors.white,
+                        height: 1.5,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    const SizedBox(width: TailwindSpacing.gap2), // gap-2
+                    const Icon(LucideIcons.arrowRight,
+                        size: 20, color: Colors.white), // w-5 h-5
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStep3() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            SvgIcons.user(size: 20, color: AppTheme.blue600),
+            const SizedBox(width: 8),
+            const Text(
+              'Step 3: Clinical Decision',
+              style: TextStyle(
+                fontSize: TailwindFontSize
+                    .textLg, // text-lg = 18px (h3 with font-semibold)
+                fontWeight: FontWeight.w600,
+                color: AppTheme.gray900,
+                height: 1.5, // line-height: 1.5
+                letterSpacing: 0,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Record your clinical judgment and reasoning. This becomes the authoritative visit record.',
+          style: TextStyle(
+            fontSize: TailwindFontSize.textSm, // text-sm = 14px
+            color: AppTheme.gray600,
+            height: 1.5, // line-height: 1.5
+            letterSpacing: 0,
+          ),
+        ),
+        const SizedBox(height: 16), // mb-4 = 16px
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left: AI Suggestion (Read-only)
+            Expanded(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8), // p-2 (further reduced)
+                    decoration: BoxDecoration(
+                      color: AppTheme.purple50,
+                      border: Border.all(color: AppTheme.purple200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(LucideIcons.brain,
+                                size: 16, color: AppTheme.purple600),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'AI Suggestion',
+                              style: TextStyle(
+                                fontSize:
+                                    TailwindFontSize.textSm, // text-sm = 14px
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.purple700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        RiskBadge(
+                          tier: _aiRecommendationRiskTier!,
+                          size: BadgeSize.md,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Text(
+                              'AI Confidence:',
+                              style: TextStyle(
+                                fontSize:
+                                    TailwindFontSize.textXs, // text-xs = 12px
+                                color: AppTheme.purple700,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.purple200,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'High',
+                                style: TextStyle(
+                                  fontSize:
+                                      TailwindFontSize.textXs, // text-xs = 12px
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.purple700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(color: AppTheme.purple200),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Icon(LucideIcons.clock,
+                                size: 12, color: AppTheme.purple700),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Analysis: ${DateTime.now().toString().substring(0, 19)}',
+                              style: const TextStyle(
+                                fontSize:
+                                    TailwindFontSize.textXs, // text-xs = 12px
+                                color: AppTheme.purple700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Based on data updated 2 days ago',
+                          style: TextStyle(
+                            fontSize: TailwindFontSize.textXs, // text-xs = 12px
+                            color: AppTheme.purple600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(8), // p-2 (further reduced)
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: AppTheme.purple200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Key Contributing Factors',
+                          style: TextStyle(
+                            fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.gray900,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildContributingFactor(
+                          Icons.trending_up,
+                          'Elevated blood pressure',
+                          'Last reading: 152/94 mmHg',
+                        ),
+                        const SizedBox(height: 8),
+                        _buildContributingFactor(
+                          Icons.warning,
+                          'History of atrial fibrillation',
+                          'Active condition since 2021',
+                        ),
+                        const SizedBox(height: 8),
+                        _buildContributingFactor(
+                          Icons.warning,
+                          'Type 2 diabetes with medication risk',
+                          'Potential interaction detected',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(8), // p-2 (further reduced)
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: AppTheme.purple200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Evidence References',
+                          style: TextStyle(
+                            fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.gray900,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildEvidenceChip('Latest vitals'),
+                            _buildEvidenceChip('Active conditions (4)'),
+                            _buildEvidenceChip('Medications (4)'),
+                            _buildEvidenceChip('Recent visit (Jan 6)'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.blue50,
+                      border: Border.all(color: AppTheme.blue200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Changes Since Last Visit',
+                          style: TextStyle(
+                            fontSize: TailwindFontSize.textXs, // text-xs = 12px
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.blue900,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildChangeItem(
+                            'BP increased from 148/92 to 152/94 mmHg'),
+                        const SizedBox(height: 4),
+                        _buildChangeItem('Medication dosage adjusted'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            // Right: Doctor Decision Panel
+            Expanded(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8), // p-2 (further reduced)
+                    decoration: BoxDecoration(
+                      color: AppTheme.blue50,
+                      border: Border.all(color: AppTheme.blue200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.person,
+                                size: 16, color: AppTheme.blue600),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Your Decision',
+                              style: TextStyle(
+                                fontSize:
+                                    TailwindFontSize.textSm, // text-sm = 14px
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.blue900,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: AppTheme.blue200),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'AI Suggested',
+                                      style: TextStyle(
+                                          fontSize: TailwindFontSize
+                                              .textXs, // text-xs = 12px
+                                          color: AppTheme.gray600),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    RiskBadge(
+                                      tier: _aiRecommendationRiskTier!,
+                                      size: BadgeSize.sm,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Your Selection',
+                                      style: TextStyle(
+                                          fontSize: TailwindFontSize
+                                              .textXs, // text-xs = 12px
+                                          color: AppTheme.gray600),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    RiskBadge(
+                                      tier: _selectedRiskTier,
+                                      size: BadgeSize.sm,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_selectedRiskTier != _aiRecommendationRiskTier) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppTheme.amber50,
+                              border: Border.all(color: AppTheme.amber200),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'Override detected: Clinical rationale required below.',
+                              style: TextStyle(
+                                fontSize:
+                                    TailwindFontSize.textXs, // text-xs = 12px
+                                color: AppTheme.amber900,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Final Risk Tier',
+                          style: TextStyle(
+                              fontSize: TailwindFontSize.textXs,
+                              color: AppTheme.gray600),
+                        ),
+                        const SizedBox(height: 4),
+                        DropdownButton<RiskTier>(
+                          value: _selectedRiskTier,
+                          isExpanded: true,
+                          items: RiskTier.values.map((tier) {
+                            return DropdownMenuItem(
+                              value: tier,
+                              child: Text('${tier.displayName} Risk'),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedRiskTier = value;
+                              });
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Clinical Notes',
+                          style: TextStyle(
+                              fontSize: TailwindFontSize.textXs,
+                              color: AppTheme.gray600),
+                        ),
+                        const SizedBox(height: 4),
+                        TextField(
+                          maxLines: 4,
+                          decoration: const InputDecoration(
+                            hintText:
+                                'Document your rationale, agreement, or override reasoning. This will be stored in the patient record.',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _clinicalNotes = value;
+                            });
+                          },
+                        ),
+                        if (_selectedRiskTier != _aiRecommendationRiskTier)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4),
+                            child: Text(
+                              'Required if your decision differs from AI assessment.',
+                              style: TextStyle(
+                                fontSize:
+                                    TailwindFontSize.textXs, // text-xs = 12px
+                                color: AppTheme.amber600,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.gray100,
+                      border: Border.all(color: AppTheme.gray200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Discussion Referenced',
+                          style: TextStyle(
+                            fontSize: TailwindFontSize.textXs, // text-xs = 12px
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.gray700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'No discussion referenced for this decision',
+                          style: TextStyle(
+                            fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                            fontStyle: FontStyle.italic,
+                            color: AppTheme.gray500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.blue50,
+            border: Border.all(color: AppTheme.blue200),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Final Review Check',
+                style: TextStyle(
+                  fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.blue900,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildCheckItem(
+                  LucideIcons.checkCircle, 'AI assessment reviewed', true),
+              SizedBox(height: TailwindSpacing.gap2),
+              _buildCheckItem(
+                  LucideIcons.checkCircle, 'Evidence reviewed', true),
+              const SizedBox(height: 8),
+              _buildCheckItem(
+                _clinicalNotes.trim().isNotEmpty ||
+                        _selectedRiskTier == _aiRecommendationRiskTier
+                    ? LucideIcons.checkCircle
+                    : LucideIcons.circle,
+                'Clinical notes completed${_selectedRiskTier != _aiRecommendationRiskTier ? ' (required for override)' : ''}',
+                _clinicalNotes.trim().isNotEmpty ||
+                    _selectedRiskTier == _aiRecommendationRiskTier,
+              ),
+              const SizedBox(height: 8),
+              _buildCheckItem(LucideIcons.checkCircle,
+                  'Decision reflects clinical judgment', true),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: _selectedRiskTier != _aiRecommendationRiskTier &&
+                    _clinicalNotes.trim().isEmpty
+                ? null
+                : _handleApproveDecision,
+            icon:
+                const Icon(LucideIcons.checkCircle, size: 20), // w-5 h-5 = 20px
+            label: const Text(
+              'Approve & Save Decision',
+              style: TextStyle(
+                fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                fontWeight: FontWeight.w500, // font-medium
+                height: 1.5,
+                letterSpacing: 0,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.green600,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 24, vertical: 12), // px-6 py-3
+              minimumSize: const Size(0, 40), // h-10 = 40px
+              disabledBackgroundColor: AppTheme.gray300,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Center(
+          child: Text(
+            'This will finalize the clinical decision for this visit and update the patient record.',
+            style: TextStyle(
+                fontSize: TailwindFontSize.textXs, color: AppTheme.gray600),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () {},
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8), // px-4 py-2
+              minimumSize: const Size(0, 36), // h-9 = 36px
+            ),
+            child: const Text(
+              'Save as Draft',
+              style: TextStyle(
+                fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                fontWeight: FontWeight.w500, // font-medium
+                height: 1.5,
+                letterSpacing: 0,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContributingFactor(
+      IconData icon, String title, String subtitle) {
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 16, color: AppTheme.purple600), // w-4 h-4 = 16px
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                      color: AppTheme.gray900,
+                      height: 1.5,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: TailwindFontSize.textXs, // text-xs = 12px
+                      color: AppTheme.gray600,
+                      height: 1.5,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEvidenceChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.purple100,
+        border: Border.all(color: AppTheme.purple200),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          color: AppTheme.purple700,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChangeItem(String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 4,
+          height: 4,
+          margin: const EdgeInsets.only(top: 6, right: 8),
+          decoration: const BoxDecoration(
+            color: AppTheme.blue600,
+            shape: BoxShape.circle,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 12, color: AppTheme.blue800),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCheckItem(IconData icon, String text, bool isChecked) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: isChecked ? AppTheme.blue600 : AppTheme.gray400,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 14,
+            color: isChecked ? AppTheme.blue800 : AppTheme.gray600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStep4() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: AppTheme.green100,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(LucideIcons.checkCircle,
+                size: 32, color: AppTheme.green600),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Visit Analysis Complete',
+            style: TextStyle(
+              fontSize: TailwindFontSize.textLg, // text-lg = 18px
+              fontWeight: FontWeight.w600,
+              color: AppTheme.gray900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Clinical decision has been approved and saved to patient record.',
+            style: TextStyle(
+              fontSize: TailwindFontSize.textSm, // text-sm = 14px
+              color: AppTheme.gray600,
+              height: 1.5,
+              letterSpacing: 0,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.green50,
+              border: Border.all(color: AppTheme.green200),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Final Risk Tier',
+                            style: TextStyle(
+                              fontSize:
+                                  TailwindFontSize.textXs, // text-xs = 12px
+                              color: AppTheme.gray600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          RiskBadge(
+                            tier: _selectedRiskTier,
+                            size: BadgeSize.sm,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Approved By',
+                            style: TextStyle(
+                              fontSize:
+                                  TailwindFontSize.textXs, // text-xs = 12px
+                              color: AppTheme.gray600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Dr. Rebecca Smith',
+                            style: TextStyle(
+                              fontSize:
+                                  TailwindFontSize.textSm, // text-sm = 14px
+                              color: AppTheme.gray900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Timestamp',
+                            style: TextStyle(
+                              fontSize:
+                                  TailwindFontSize.textXs, // text-xs = 12px
+                              color: AppTheme.gray600,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Jan 9, 2026, 4:44:46 PM',
+                            style: TextStyle(
+                              fontSize:
+                                  TailwindFontSize.textSm, // text-sm = 14px
+                              color: AppTheme.gray900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppTheme.gray200),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Visit Outcome Summary',
+                  style: TextStyle(
+                    fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.gray900,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildOutcomeItem(LucideIcons.checkCircle,
+                    'Clinical decision documented', true),
+                SizedBox(height: TailwindSpacing.gap2),
+                _buildOutcomeItem(LucideIcons.checkCircle,
+                    'Background monitoring status: Active', true),
+                SizedBox(height: TailwindSpacing.gap2),
+                _buildOutcomeItem(LucideIcons.clock,
+                    'Follow-up: Scheduled on Jan 22, 2026', false),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              OutlinedButton(
+                onPressed: () {
+                  setState(() {
+                    _currentStep = 1;
+                    _flowStatus = 'not-started';
+                    _analysisRun = false;
+                    _aiRecommendationRiskTier = null;
+                    _aiReasoning = null;
+                    _selectedRiskTier = RiskTier.high;
+                    _clinicalNotes = '';
+                  });
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8), // px-4 py-2
+                  minimumSize: const Size(0, 36), // h-9 = 36px
+                ),
+                child: const Text(
+                  'Start New Visit',
+                  style: TextStyle(
+                    fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                    fontWeight: FontWeight.w500, // font-medium
+                    height: 1.5,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8), // px-4 py-2
+                  minimumSize: const Size(0, 36), // h-9 = 36px
+                ),
+                child: const Text(
+                  'View Full Record',
+                  style: TextStyle(
+                    fontSize: TailwindFontSize.textSm, // text-sm = 14px
+                    fontWeight: FontWeight.w500, // font-medium
+                    height: 1.5,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOutcomeItem(IconData icon, String text, bool isCheck) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: isCheck ? AppTheme.green600 : AppTheme.gray400,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: TailwindFontSize.textSm, // text-sm = 14px
+              color: isCheck ? AppTheme.gray700 : AppTheme.gray600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

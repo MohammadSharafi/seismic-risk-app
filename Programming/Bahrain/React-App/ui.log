@@ -1,0 +1,199 @@
+
+> react-app@0.0.0 dev
+> vite
+
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+
+  VITE v4.5.14  ready in 193 ms
+
+  ➜  Local:   http://localhost:11:27:39 PM [vite] page reload index.html
+11:28:26 PM [vite] page reload index.html
+11:50:13 PM [vite] changed tsconfig file de11:50:13 PM [vite] changed tsconfig file detected: /Users/moe/Programming/Bahrain/React-App/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScri3:10:02 PM [vite] page reload dist/index.ht3:16:05:20 PM [vite] page reload dist/index.ht6:06:09:13 PM [vite] page reload dist/index.html
+6:38:46 PM [vite] page reload dist/index.html
+6:38:46 PM [vite] page reload dist/index.ht6:37:00:44 PM [vite] page reload dist/index.html
+7:02:07 PM [vite] page reload dist/index.ht7:07:02:07 PM [vite] page reload dist/index.ht7:08:52 PM [vite] page reload dist/index.html
+7:17:11:27 PM [vite] page reload dist/index.ht7:27:20:21 PM [vite] page reload dist/index.ht7:21:32 PM [vite] page reload dist/index.html
+7:30:49 PM [vite] page reload dist/index.html
+8:15:25 PM [vite] page reload dist/index.html
+10:14:30 PM [vite] page reload dist/index.html
+12:31:17 AM [vite] vite.config.ts changed, restarting server...
+12:31:17 AM [vite] page reload index.html
+12:31:17 AM [vite] changed tsconfig file detected: /Users/moe/Programming/Bahrain/React-App/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+Por12:31:18 AM [vite] server restarted.
+
+  12:31:18 AM [vite] server restarted.
+
+  ➜  Local:   http://localhost:51712:31:18 AM [vite] page reload index.html
+1:35:37 AM [vite] page reload dist/index1:35:31:57:31 AM [vite] page reload dist/index.html
+1:59:25 AM [vite] page reload dist/index.html
+
+warn - Your `content` configuration inc2:07:28 AM [vite] page reload dist/index.html
+2:25:59 AM [vite] page reload dist/index.html
+2:39:45 AM [vite] page reload dist/index.html
+4:25:44 AM [vite] page reload dist/index.html
+4:48:00 AM [vite] page reload dist/index.html
+4:50:40 AM [vite] page reload dist/index.html
+4:54:08 AM [vite] page reload dist/index.html
+4:55:46 AM [vite] page reload dist/index.html
+5:12:25 AM [vite] page reload dist/index.html
+5:14:48 AM [vite] page reload dist/index.html
+5:16:13 AM [vite] page reload dist/index.html
+5:18:42 AM [vite] page reload dist/index.html
+
+warn - Your `content` configuration includes a pattern which looks like it's accidentally matching all of `node_modules` and can cause serious performance issues.
+warn - Pattern: `./**/*.ts`
+warn - See our documentation for recommendations:
+warn - https://tailwindcss.com/docs/content-configuration#pattern-recommendations
+6:08:47 PM [vite] page reload main.tsx
+6:08:48 PM [vite] page reload tailwind.config.js
+6:08:48 PM [vite] page reload postcss.config.js
+6:08:48 PM [vite] vite.config.ts changed, restarting server...
+6:08:48 PM [vite] hmr update /styles/globals.css
+6:08:48 PM [vite] page reload components/DecisionHistory.tsx
+6:08:48 PM [vite] hmr update /components/ui/label.tsx, /styles/globals.css
+6:08:48 PM [vite] page reload components/ui/form.tsx
+6:08:48 PM [vite] hmr update /components/FullClinicalSummary.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/ClinicalSummary.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/ClinicalDiscussionPreview.tsx, /styles/globals.css
+6:08:48 PM [vite] page reload index.html
+6:08:48 PM [vite] hmr update /components/LoginPage.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/BackgroundMonitoring.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/VisitTimeline.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /App.tsx, /styles/globals.css, /components/LoginPage.tsx, /components/DoctorDashboard.tsx, /components/VisitTimeline.tsx, /components/BackgroundMonitoring.tsx, /components/PatientFullRecord.tsx, /components/FullTimeline.tsx, /components/ClinicalDiscussion.tsx, /components/VisitAnalysisFlow.tsx
+6:08:48 PM [vite] hmr update /components/PatientFullRecord.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/ClinicalDiscussion.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/RiskBadge.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /App.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/FullTimeline.tsx, /styles/globals.css
+6:08:48 PM [vite] page reload components/DoctorReview.tsx
+6:08:48 PM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+6:08:48 PM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+6:08:48 PM [vite] server restarted.
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+6:08:48 PM [vite] vite.config.ts changed, restarting server...
+6:08:48 PM [vite] server restarted.
+6:08:49 PM [vite] page reload index.html
+AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+2:39:45 AM [vite] page reload dist/index.html
+2:45:31 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:21:23 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:23:13 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:23:31 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:23:52 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:24:10 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:24:33 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:25:01 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:25:44 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:25:44 AM [vite] page reload dist/assets/index.es-692eba96.js
+4:25:44 AM [vite] page reload dist/assets/index-340447c6.js
+4:25:44 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:25:44 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:25:44 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:25:44 AM [vite] page reload dist/index.html
+4:25:44 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:25:44 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:41:08 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:42:37 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:43:20 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:45:05 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:45:47 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:46:15 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:46:47 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:47:19 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:48:00 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:48:00 AM [vite] page reload dist/assets/index-161baedf.js
+4:48:00 AM [vite] page reload dist/assets/index.es-5a7c4549.js
+4:48:00 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:48:00 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:48:00 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:48:00 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:48:00 AM [vite] page reload dist/index.html
+4:48:00 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:48:00 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:48:27 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:48:56 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:49:20 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:50:02 AM [vite] hmr update /components/VisitAnalysisFlow.tsx, /styles/globals.css
+4:50:40 AM [vite] page reload dist/assets/index-705d4bf3.js
+4:50:40 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:50:40 AM [vite] page reload dist/assets/index.es-55d450ca.js
+4:50:40 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:50:40 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:50:40 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:50:40 AM [vite] page reload dist/index.html
+4:50:40 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:50:40 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:53:02 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:53:25 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:54:08 AM [vite] page reload dist/assets/index-ff3136f9.js
+4:54:08 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:54:08 AM [vite] page reload dist/assets/index.es-3bef2756.js
+4:54:08 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:54:08 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:54:08 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:54:08 AM [vite] page reload dist/index.html
+4:54:08 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:54:08 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:55:03 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+4:55:45 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:55:45 AM [vite] page reload dist/assets/index.es-5ed519d9.js
+4:55:45 AM [vite] page reload dist/assets/index-ea351f48.js
+4:55:45 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:55:46 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:55:46 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+4:55:46 AM [vite] page reload dist/index.html
+4:55:46 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+4:55:46 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:02:47 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:11:49 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:12:25 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:12:25 AM [vite] page reload dist/assets/index.es-3e3440d4.js
+5:12:25 AM [vite] page reload dist/assets/index-e83ac47a.js
+5:12:25 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:12:25 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:12:25 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:12:25 AM [vite] page reload dist/index.html
+5:12:25 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:12:25 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:12:34 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:13:47 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:14:11 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:14:48 AM [vite] page reload dist/assets/index.es-9422c160.js
+5:14:48 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:14:48 AM [vite] page reload dist/assets/index-dceccc6f.js
+5:14:48 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:14:48 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:14:48 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:14:48 AM [vite] page reload dist/index.html
+5:14:48 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:14:48 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:15:19 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:15:37 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:16:13 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:16:13 AM [vite] page reload dist/assets/index-cdaa5bed.js
+5:16:13 AM [vite] page reload dist/assets/index.es-deab0f22.js
+5:16:13 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:16:13 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:16:13 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:16:13 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:16:13 AM [vite] page reload dist/index.html
+5:16:13 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:16:20 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:17:10 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:17:32 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:18:03 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
+5:18:42 AM [vite] page reload dist/assets/index.es-b04c2b1d.js
+5:18:42 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:18:42 AM [vite] page reload dist/assets/index-396247d8.js
+5:18:42 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:18:42 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:18:42 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:18:42 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:18:42 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:18:42 AM [vite] page reload dist/index.html
+5:18:42 AM [vite] page reload dist/assets/html2canvas.esm-e0a7d97b.js
+5:18:42 AM [vite] page reload dist/assets/purify.es-ce17b1ad.js
+5:18:52 AM [vite] hmr update /components/DoctorDashboard.tsx, /styles/globals.css
