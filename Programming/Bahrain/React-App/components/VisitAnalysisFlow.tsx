@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, Circle, ArrowRight, Brain, User, FileCheck, AlertCircle, Clock, Edit, Trash2, Plus, FileText, Download } from 'lucide-react';
+import { CheckCircle, Circle, ArrowRight, Brain, User, FileCheck, AlertCircle, Clock, Edit, Trash2, Plus, FileText, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { Patient } from '../App';
 import { RiskBadge } from './RiskBadge';
 import { API_BASE_URL } from '../src/config';
@@ -87,6 +87,12 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
   const [openRisks, setOpenRisks] = useState<any[]>([]);
   const [editingMedicationId, setEditingMedicationId] = useState<string | null>(null);
   const [editingProcedureId, setEditingProcedureId] = useState<string | null>(null);
+  // Expand/collapse states for Step 3 cards
+  const [expandedDiagnosis, setExpandedDiagnosis] = useState<Set<number>>(new Set());
+  const [expandedMedications, setExpandedMedications] = useState<Set<string>>(new Set());
+  const [expandedProcedures, setExpandedProcedures] = useState<Set<string>>(new Set());
+  const [expandedRiskAssessment, setExpandedRiskAssessment] = useState(false);
+  const [expandedAdditionalRecs, setExpandedAdditionalRecs] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{type: 'medication' | 'procedure', id: string} | null>(null);
   const [addingMedication, setAddingMedication] = useState(false);
   const [addingProcedure, setAddingProcedure] = useState(false);
@@ -1362,11 +1368,15 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                         const reasoning = diagnosis.reasoning || '';
                         const supportingEvidence = diagnosis.supportingEvidence || (diagnosis as any).supporting_evidence || [];
                         
+                        const isExpanded = expandedDiagnosis.has(idx);
                         return (
-                        <div key={idx} className="bg-white border border-gray-200 rounded-2xl p-7 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50/30">
-                          {/* Diagnosis Name Header */}
-                          <div className="flex items-start justify-between mb-6 pb-5 border-b-2 border-gray-100">
-                            <div className="flex-1 pr-4">
+                        <div key={idx} className="bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50/30">
+                          {/* Diagnosis Name Header - Clickable */}
+                          <button
+                            onClick={() => toggleDiagnosis(idx)}
+                            className="w-full flex items-start justify-between p-7 pb-5 border-b-2 border-gray-100 hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex-1 pr-4 text-left">
                               <div className="flex items-center gap-3 mb-2">
                                 <div className={`w-2 h-2 rounded-full ${
                                   probabilityBin === 'High' ? 'bg-red-500' :
@@ -1391,53 +1401,65 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                              <span className={`px-5 py-2.5 text-xs font-bold rounded-full whitespace-nowrap shadow-md ${
-                                probabilityBin === 'High' ? 'bg-gradient-to-r from-red-500 to-red-600 text-white' :
-                                probabilityBin === 'Medium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white' :
-                                'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                              }`}>
-                                {probabilityBin === 'High' ? 'High Confidence' :
-                                 probabilityBin === 'Medium' ? 'Moderate Confidence' :
-                                 'Low Confidence'}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-5 py-2.5 text-xs font-bold rounded-full whitespace-nowrap shadow-md ${
+                                  probabilityBin === 'High' ? 'bg-gradient-to-r from-red-500 to-red-600 text-white' :
+                                  probabilityBin === 'Medium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white' :
+                                  'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                                }`}>
+                                  {probabilityBin === 'High' ? 'High Confidence' :
+                                   probabilityBin === 'Medium' ? 'Moderate Confidence' :
+                                   'Low Confidence'}
+                                </span>
+                                {isExpanded ? (
+                                  <ChevronUp className="w-5 h-5 text-gray-500" />
+                                ) : (
+                                  <ChevronDown className="w-5 h-5 text-gray-500" />
+                                )}
+                              </div>
                               {confidenceScore !== undefined && confidenceScore !== null && (
                                 <span className="text-xs text-gray-600 font-semibold">
                                   Score: {(typeof confidenceScore === 'number' ? (confidenceScore * 100).toFixed(0) : confidenceScore)}%
                                 </span>
                               )}
                             </div>
-                          </div>
+                          </button>
                           
-                          {/* Clinical Reasoning */}
-                          {reasoning && (
-                            <div className="mb-6">
-                              <div className="flex items-center gap-2 mb-4">
-                                <div className="w-1 h-1 bg-purple-600 rounded-full"></div>
-                                <div className="text-xs font-bold text-purple-700 uppercase tracking-wider">Clinical Reasoning</div>
-                              </div>
-                              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-100 shadow-sm">
-                                <p className="text-sm text-gray-800 leading-relaxed">
-                                  {reasoning}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {/* Supporting Evidence */}
-                          {supportingEvidence && supportingEvidence.length > 0 && (
-                            <div className="pt-5 border-t border-gray-100">
-                              <div className="flex items-center gap-2 mb-4">
-                                <div className="w-1 h-1 bg-indigo-600 rounded-full"></div>
-                                <div className="text-xs font-bold text-indigo-700 uppercase tracking-wider">Supporting Evidence</div>
-                              </div>
-                              <ul className="space-y-2">
-                                {supportingEvidence.map((evidence: string, evIdx: number) => (
-                                  <li key={evIdx} className="flex items-start gap-2 text-sm text-gray-700">
-                                    <span className="text-indigo-600 font-bold mt-0.5">•</span>
-                                    <span className="flex-1">{evidence}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                          {/* Expandable Content */}
+                          {isExpanded && (
+                            <div className="px-7 pb-7">
+                              {/* Clinical Reasoning */}
+                              {reasoning && (
+                                <div className="mb-6">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-1 h-1 bg-purple-600 rounded-full"></div>
+                                    <div className="text-xs font-bold text-purple-700 uppercase tracking-wider">Clinical Reasoning</div>
+                                  </div>
+                                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-100 shadow-sm">
+                                    <p className="text-sm text-gray-800 leading-relaxed">
+                                      {reasoning}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Supporting Evidence */}
+                              {supportingEvidence && supportingEvidence.length > 0 && (
+                                <div className="pt-5 border-t border-gray-100">
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-1 h-1 bg-indigo-600 rounded-full"></div>
+                                    <div className="text-xs font-bold text-indigo-700 uppercase tracking-wider">Supporting Evidence</div>
+                                  </div>
+                                  <ul className="space-y-2">
+                                    {supportingEvidence.map((evidence: string, evIdx: number) => (
+                                      <li key={evIdx} className="flex items-start gap-2 text-sm text-gray-700">
+                                        <span className="text-indigo-600 font-bold mt-0.5">•</span>
+                                        <span className="flex-1">{evidence}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1562,8 +1584,11 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                         ) : (
                           /* Read Mode */
                           <>
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex-1 pr-4">
+                            <button
+                              onClick={() => toggleMedication(med.id)}
+                              className="w-full flex items-start justify-between mb-3 hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
+                            >
+                              <div className="flex-1 pr-4 text-left">
                                 <div className="flex items-center gap-3 mb-2 flex-wrap">
                                   <div className="font-bold text-base text-gray-900">
                                     {med.medication}
@@ -1599,6 +1624,30 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                     </>
                                   )}
                                 </div>
+                                {!expandedMedications.has(med.id) && (
+                                  <div className="text-sm text-gray-700 leading-relaxed">
+                                    <span className="font-semibold text-gray-900">Rationale:</span> {med.rationale.length > 100 ? med.rationale.substring(0, 100) + '...' : med.rationale}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex flex-col items-end gap-2 ml-3 flex-shrink-0">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm ${getStatusBadgeClass(med.status)}`}
+                                    title={`Status: ${med.status}`}
+                                  >
+                                    {med.status}
+                                  </span>
+                                  {expandedMedications.has(med.id) ? (
+                                    <ChevronUp className="w-4 h-4 text-gray-500" />
+                                  ) : (
+                                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                            {expandedMedications.has(med.id) && (
+                              <div className="mt-2">
                                 <div className="text-sm text-gray-700 mb-3 leading-relaxed">
                                   <span className="font-semibold text-gray-900">Rationale:</span> {med.rationale}
                                 </div>
@@ -1638,15 +1687,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                   ))}
                                 </div>
                               </div>
-                              <div className="flex flex-col items-end gap-2 ml-3 flex-shrink-0">
-                                <span
-                                  className={`px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm ${getStatusBadgeClass(med.status)}`}
-                                  title={`Status: ${med.status}`}
-                                >
-                                  {med.status}
-                                </span>
-                              </div>
-                            </div>
+                            )}
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleEditMedication(med)}
@@ -1861,8 +1902,11 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                         ) : (
                           /* Read Mode */
                           <>
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex-1 pr-4">
+                            <button
+                              onClick={() => toggleProcedure(proc.id)}
+                              className="w-full flex items-start justify-between mb-3 hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
+                            >
+                              <div className="flex-1 pr-4 text-left">
                                 <div className="flex items-center gap-3 mb-2 flex-wrap">
                                   <div className="font-bold text-base text-gray-900">
                                     {proc.procedure}
@@ -1884,6 +1928,30 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                     </>
                                   )}
                                 </div>
+                                {!expandedProcedures.has(proc.id) && (
+                                  <div className="text-sm text-gray-700 leading-relaxed">
+                                    <span className="font-semibold text-gray-900">Rationale:</span> {proc.rationale.length > 100 ? proc.rationale.substring(0, 100) + '...' : proc.rationale}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex flex-col items-end gap-2 ml-3 flex-shrink-0">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm ${getStatusBadgeClass(proc.status)}`}
+                                    title={`Status: ${proc.status}`}
+                                  >
+                                    {proc.status}
+                                  </span>
+                                  {expandedProcedures.has(proc.id) ? (
+                                    <ChevronUp className="w-4 h-4 text-gray-500" />
+                                  ) : (
+                                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                            {expandedProcedures.has(proc.id) && (
+                              <div className="mt-2">
                                 <div className="text-sm text-gray-700 mb-3 leading-relaxed">
                                   <span className="font-semibold text-gray-900">Rationale:</span> {proc.rationale}
                                 </div>
@@ -1899,15 +1967,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                   ))}
                                 </div>
                               </div>
-                              <div className="flex flex-col items-end gap-2 ml-3 flex-shrink-0">
-                                <span
-                                  className={`px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm ${getStatusBadgeClass(proc.status)}`}
-                                  title={`Status: ${proc.status}`}
-                                >
-                                  {proc.status}
-                                </span>
-                              </div>
-                            </div>
+                            )}
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleEditProcedure(proc)}
@@ -2057,45 +2117,59 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
 
                   {aiRecommendation.riskAssessment && (
                     <div className="p-5 bg-gradient-to-br from-amber-50 to-amber-100/50 border-2 border-amber-200 rounded-xl shadow-md">
-                      <div className="flex items-center justify-between mb-4">
+                      <button
+                        onClick={() => setExpandedRiskAssessment(!expandedRiskAssessment)}
+                        className="w-full flex items-center justify-between mb-4 hover:bg-amber-100/50 p-2 -m-2 rounded transition-colors"
+                      >
                         <div className="text-sm font-bold text-amber-900">Risk Assessment</div>
-                        {aiRecommendation.riskAssessment.overall_risk && (
-                          <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${
-                            aiRecommendation.riskAssessment.overall_risk === 'High' ? 'bg-red-100 text-red-800 border border-red-300' :
-                            aiRecommendation.riskAssessment.overall_risk === 'Medium' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                            'bg-blue-100 text-blue-800 border border-blue-300'
-                          }`}>
-                            Overall Risk: {aiRecommendation.riskAssessment.overall_risk}
-                          </span>
-                        )}
-                      </div>
-                      {aiRecommendation.riskAssessment.risk_factors_identified && aiRecommendation.riskAssessment.risk_factors_identified.length > 0 && (
-                        <div className="mb-4">
-                          <div className="text-xs text-amber-800 font-semibold mb-2 uppercase tracking-wide">Risk Factors</div>
-                          <div className="flex flex-wrap gap-2">
-                            {aiRecommendation.riskAssessment.risk_factors_identified.map((factor: any, idx: number) => (
-                              <span 
-                                key={idx} 
-                                className="inline-flex items-center px-2.5 py-1 bg-amber-100 text-amber-900 text-xs font-medium rounded-md border border-amber-300"
-                              >
-                                {typeof factor === 'string' ? factor : factor.factor || 'Unknown risk factor'}
-                              </span>
-                            ))}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          {aiRecommendation.riskAssessment.overall_risk && (
+                            <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${
+                              aiRecommendation.riskAssessment.overall_risk === 'High' ? 'bg-red-100 text-red-800 border border-red-300' :
+                              aiRecommendation.riskAssessment.overall_risk === 'Medium' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                              'bg-blue-100 text-blue-800 border border-blue-300'
+                            }`}>
+                              Overall Risk: {aiRecommendation.riskAssessment.overall_risk}
+                            </span>
+                          )}
+                          {expandedRiskAssessment ? (
+                            <ChevronUp className="w-4 h-4 text-amber-700" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-amber-700" />
+                          )}
                         </div>
-                      )}
-                      {aiRecommendation.riskAssessment.mitigation_strategies && aiRecommendation.riskAssessment.mitigation_strategies.length > 0 && (
-                        <div>
-                          <div className="text-xs text-amber-800 font-semibold mb-2 uppercase tracking-wide">Mitigation Strategies</div>
-                          <ul className="space-y-2 text-xs text-amber-800">
-                            {aiRecommendation.riskAssessment.mitigation_strategies.map((strategy: string, idx: number) => (
-                              <li key={idx} className="flex items-start gap-2.5">
-                                <div className="w-1.5 h-1.5 bg-amber-600 rounded-full mt-1.5 flex-shrink-0"></div>
-                                <div className="flex-1 leading-relaxed">{strategy}</div>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                      </button>
+                      {expandedRiskAssessment && (
+                        <>
+                          {aiRecommendation.riskAssessment.risk_factors_identified && aiRecommendation.riskAssessment.risk_factors_identified.length > 0 && (
+                            <div className="mb-4">
+                              <div className="text-xs text-amber-800 font-semibold mb-2 uppercase tracking-wide">Risk Factors</div>
+                              <div className="flex flex-wrap gap-2">
+                                {aiRecommendation.riskAssessment.risk_factors_identified.map((factor: any, idx: number) => (
+                                  <span 
+                                    key={idx} 
+                                    className="inline-flex items-center px-2.5 py-1 bg-amber-100 text-amber-900 text-xs font-medium rounded-md border border-amber-300"
+                                  >
+                                    {typeof factor === 'string' ? factor : factor.factor || 'Unknown risk factor'}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {aiRecommendation.riskAssessment.mitigation_strategies && aiRecommendation.riskAssessment.mitigation_strategies.length > 0 && (
+                            <div>
+                              <div className="text-xs text-amber-800 font-semibold mb-2 uppercase tracking-wide">Mitigation Strategies</div>
+                              <ul className="space-y-2 text-xs text-amber-800">
+                                {aiRecommendation.riskAssessment.mitigation_strategies.map((strategy: string, idx: number) => (
+                                  <li key={idx} className="flex items-start gap-2.5">
+                                    <div className="w-1.5 h-1.5 bg-amber-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                                    <div className="flex-1 leading-relaxed">{strategy}</div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
@@ -2168,29 +2242,41 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                   {/* Additional Recommendations */}
                   {aiRecommendation.additionalRecommendations && aiRecommendation.additionalRecommendations.length > 0 && (
                     <div className="p-3 bg-gradient-to-br from-blue-50 via-blue-100/70 to-blue-50 border-2 border-blue-200 rounded-lg shadow-sm">
-                      <div className="text-sm font-bold text-blue-900 mb-2">Additional Recommendations</div>
-                      <div className="space-y-1.5">
-                        {aiRecommendation.additionalRecommendations.map((rec: string, idx: number) => {
-                          // Parse category if present (format: "Category: Recommendation text")
-                          const parts = rec.split(':');
-                          const category = parts.length > 1 ? parts[0].trim() : null;
-                          const recommendation = parts.length > 1 ? parts.slice(1).join(':').trim() : rec;
-                          
-                          return (
-                            <div key={idx} className="flex items-start gap-2 bg-white rounded-md p-2 border border-blue-200/60">
-                              <div className="w-2 h-2 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
-                              <div className="flex-1">
-                                {category && (
-                                  <span className="text-xs font-bold text-blue-700 uppercase tracking-wide mr-1.5">
-                                    {category}:
-                                  </span>
-                                )}
-                                <span className="text-xs text-gray-900 leading-snug">{recommendation}</span>
+                      <button
+                        onClick={() => setExpandedAdditionalRecs(!expandedAdditionalRecs)}
+                        className="w-full flex items-center justify-between mb-2 hover:bg-blue-100/50 p-2 -m-2 rounded transition-colors"
+                      >
+                        <div className="text-sm font-bold text-blue-900">Additional Recommendations</div>
+                        {expandedAdditionalRecs ? (
+                          <ChevronUp className="w-4 h-4 text-blue-700" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-blue-700" />
+                        )}
+                      </button>
+                      {expandedAdditionalRecs && (
+                        <div className="space-y-1.5">
+                          {aiRecommendation.additionalRecommendations.map((rec: string, idx: number) => {
+                            // Parse category if present (format: "Category: Recommendation text")
+                            const parts = rec.split(':');
+                            const category = parts.length > 1 ? parts[0].trim() : null;
+                            const recommendation = parts.length > 1 ? parts.slice(1).join(':').trim() : rec;
+                            
+                            return (
+                              <div key={idx} className="flex items-start gap-2 bg-white rounded-md p-2 border border-blue-200/60">
+                                <div className="w-2 h-2 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div className="flex-1">
+                                  {category && (
+                                    <span className="text-xs font-bold text-blue-700 uppercase tracking-wide mr-1.5">
+                                      {category}:
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-gray-900 leading-snug">{recommendation}</span>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
