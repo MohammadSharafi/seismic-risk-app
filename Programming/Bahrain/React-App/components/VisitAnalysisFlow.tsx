@@ -239,12 +239,16 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
         const meds = aiResponse.medication_recommendations.map((med: any, idx: number) => ({
           id: `med_${idx + 1}`,
           medication: med.medication || 'Unknown medication',
+          medicationCode: med.medication_code || '',
           dose: med.dose || '',
           frequency: med.frequency || '',
           duration: med.duration || 'Ongoing',
           rationale: med.rationale || '',
           evidence: Array.isArray(med.reasoning) ? med.reasoning : (med.reasoning ? [med.reasoning] : []),
-          status: med.status || 'Unknown' // Keep original status from LLM
+          status: med.status || 'Unknown', // Keep original status from LLM
+          priority: med.priority || '',
+          contraindications: Array.isArray(med.contraindications) ? med.contraindications : [],
+          monitoringRequired: Array.isArray(med.monitoring_required) ? med.monitoring_required : []
         }));
         setMedications(meds);
       } else {
@@ -259,7 +263,8 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
           timing: proc.timing || '',
           rationale: proc.rationale || '',
           evidence: Array.isArray(proc.reasoning) ? proc.reasoning : (proc.reasoning ? [proc.reasoning] : []),
-          status: proc.status || 'Unknown' // Keep original status from LLM
+          status: proc.status || 'Unknown', // Keep original status from LLM
+          priority: proc.priority || ''
         }));
         setProcedures(procs);
       } else {
@@ -1350,7 +1355,10 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                       {aiRecommendation.differentialDiagnosis.map((diagnosis, idx) => {
                         // Handle both camelCase and snake_case from API
                         const diagnosisName = diagnosis.diagnosisName || (diagnosis as any).diagnosis_name || 'Diagnosis';
+                        const diagnosisCode = (diagnosis as any).diagnosis_code || '';
+                        const standardDiagnosisName = (diagnosis as any).Standard_diagnosis_name || (diagnosis as any).standard_diagnosis_name || '';
                         const probabilityBin = diagnosis.probabilityBin || (diagnosis as any).probability_bin || 'Low';
+                        const confidenceScore = (diagnosis as any).confidence_score || diagnosis.confidenceScore;
                         const reasoning = diagnosis.reasoning || '';
                         const supportingEvidence = diagnosis.supportingEvidence || (diagnosis as any).supporting_evidence || [];
                         
@@ -1365,20 +1373,39 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                   probabilityBin === 'Medium' ? 'bg-yellow-500' :
                                   'bg-blue-500'
                                 }`}></div>
-                                <h6 className="text-xl font-bold text-black leading-tight">
-                                  {diagnosisName}
-                                </h6>
+                                <div className="flex-1">
+                                  <h6 className="text-xl font-bold text-black leading-tight">
+                                    {diagnosisName}
+                                  </h6>
+                                  {standardDiagnosisName && (
+                                    <div className="text-sm text-gray-600 mt-1 italic">
+                                      {standardDiagnosisName}
+                                    </div>
+                                  )}
+                                  {diagnosisCode && (
+                                    <div className="text-xs text-gray-500 mt-1 font-mono">
+                                      Code: {diagnosisCode}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            <span className={`px-5 py-2.5 text-xs font-bold rounded-full whitespace-nowrap shadow-md ${
-                              probabilityBin === 'High' ? 'bg-gradient-to-r from-red-500 to-red-600 text-white' :
-                              probabilityBin === 'Medium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white' :
-                              'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                            }`}>
-                              {probabilityBin === 'High' ? 'High Confidence' :
-                               probabilityBin === 'Medium' ? 'Moderate Confidence' :
-                               'Low Confidence'}
-                            </span>
+                            <div className="flex flex-col items-end gap-2">
+                              <span className={`px-5 py-2.5 text-xs font-bold rounded-full whitespace-nowrap shadow-md ${
+                                probabilityBin === 'High' ? 'bg-gradient-to-r from-red-500 to-red-600 text-white' :
+                                probabilityBin === 'Medium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white' :
+                                'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                              }`}>
+                                {probabilityBin === 'High' ? 'High Confidence' :
+                                 probabilityBin === 'Medium' ? 'Moderate Confidence' :
+                                 'Low Confidence'}
+                              </span>
+                              {confidenceScore !== undefined && confidenceScore !== null && (
+                                <span className="text-xs text-gray-600 font-semibold">
+                                  Score: {(typeof confidenceScore === 'number' ? (confidenceScore * 100).toFixed(0) : confidenceScore)}%
+                                </span>
+                              )}
+                            </div>
                           </div>
                           
                           {/* Clinical Reasoning */}
@@ -1537,10 +1564,18 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                           <>
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1 pr-4">
-                                <div className="flex items-center gap-3 mb-2">
+                                <div className="flex items-center gap-3 mb-2 flex-wrap">
                                   <div className="font-bold text-base text-gray-900">
                                     {med.medication}
                                   </div>
+                                  {(med as any).medicationCode && (
+                                    <>
+                                      <span className="text-gray-400">•</span>
+                                      <div className="text-xs text-gray-500 font-mono">
+                                        Code: {(med as any).medicationCode}
+                                      </div>
+                                    </>
+                                  )}
                                   <span className="text-gray-400">•</span>
                                   <div className="text-sm text-gray-700 font-medium">
                                     {med.dose} {med.frequency}
@@ -1551,10 +1586,46 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                       <div className="text-xs text-gray-500">({med.duration})</div>
                                     </>
                                   )}
+                                  {(med as any).priority && (
+                                    <>
+                                      <span className="text-gray-400">•</span>
+                                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                                        (med as any).priority === 'High' ? 'bg-red-100 text-red-800' :
+                                        (med as any).priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-blue-100 text-blue-800'
+                                      }`}>
+                                        {(med as any).priority} Priority
+                                      </span>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="text-sm text-gray-700 mb-3 leading-relaxed">
                                   <span className="font-semibold text-gray-900">Rationale:</span> {med.rationale}
                                 </div>
+                                {(med as any).contraindications && (med as any).contraindications.length > 0 && (
+                                  <div className="mb-3">
+                                    <div className="text-xs font-semibold text-red-700 mb-1">Contraindications:</div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {(med as any).contraindications.map((contra: string, idx: number) => (
+                                        <span key={idx} className="px-2 py-1 bg-red-50 text-red-700 text-xs font-medium rounded border border-red-200">
+                                          {contra}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {(med as any).monitoringRequired && (med as any).monitoringRequired.length > 0 && (
+                                  <div className="mb-3">
+                                    <div className="text-xs font-semibold text-blue-700 mb-1">Monitoring Required:</div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {(med as any).monitoringRequired.map((monitor: string, idx: number) => (
+                                        <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded border border-blue-200">
+                                          {monitor}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                                 <div className="flex flex-wrap gap-2 mb-3">
                                   {med.evidence.map((ev, idx) => (
                                     <span
@@ -1567,7 +1638,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                   ))}
                                 </div>
                               </div>
-                              <div className="flex items-start gap-2 ml-3 flex-shrink-0">
+                              <div className="flex flex-col items-end gap-2 ml-3 flex-shrink-0">
                                 <span
                                   className={`px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm ${getStatusBadgeClass(med.status)}`}
                                   title={`Status: ${med.status}`}
@@ -1792,7 +1863,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                           <>
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1 pr-4">
-                                <div className="flex items-center gap-3 mb-2">
+                                <div className="flex items-center gap-3 mb-2 flex-wrap">
                                   <div className="font-bold text-base text-gray-900">
                                     {proc.procedure}
                                   </div>
@@ -1800,6 +1871,18 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                   <div className="text-sm text-gray-700 font-medium">
                                     {proc.timing}
                                   </div>
+                                  {(proc as any).priority && (
+                                    <>
+                                      <span className="text-gray-400">•</span>
+                                      <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                                        (proc as any).priority === 'High' ? 'bg-red-100 text-red-800' :
+                                        (proc as any).priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-blue-100 text-blue-800'
+                                      }`}>
+                                        {(proc as any).priority} Priority
+                                      </span>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="text-sm text-gray-700 mb-3 leading-relaxed">
                                   <span className="font-semibold text-gray-900">Rationale:</span> {proc.rationale}
@@ -1816,7 +1899,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                   ))}
                                 </div>
                               </div>
-                              <div className="flex items-start gap-2 ml-3 flex-shrink-0">
+                              <div className="flex flex-col items-end gap-2 ml-3 flex-shrink-0">
                                 <span
                                   className={`px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm ${getStatusBadgeClass(proc.status)}`}
                                   title={`Status: ${proc.status}`}
@@ -1974,7 +2057,18 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
 
                   {aiRecommendation.riskAssessment && (
                     <div className="p-5 bg-gradient-to-br from-amber-50 to-amber-100/50 border-2 border-amber-200 rounded-xl shadow-md">
-                      <div className="text-sm font-bold text-amber-900 mb-4">Risk Assessment</div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="text-sm font-bold text-amber-900">Risk Assessment</div>
+                        {aiRecommendation.riskAssessment.overall_risk && (
+                          <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${
+                            aiRecommendation.riskAssessment.overall_risk === 'High' ? 'bg-red-100 text-red-800 border border-red-300' :
+                            aiRecommendation.riskAssessment.overall_risk === 'Medium' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                            'bg-blue-100 text-blue-800 border border-blue-300'
+                          }`}>
+                            Overall Risk: {aiRecommendation.riskAssessment.overall_risk}
+                          </span>
+                        )}
+                      </div>
                       {aiRecommendation.riskAssessment.risk_factors_identified && aiRecommendation.riskAssessment.risk_factors_identified.length > 0 && (
                         <div className="mb-4">
                           <div className="text-xs text-amber-800 font-semibold mb-2 uppercase tracking-wide">Risk Factors</div>
