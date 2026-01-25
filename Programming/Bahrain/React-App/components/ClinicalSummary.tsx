@@ -114,7 +114,26 @@ export function ClinicalSummary({ patient, onViewFullSummary }: ClinicalSummaryP
       : [];
   
   // Filter to only show Active medications (exclude DRAFT/Stopped)
-  const detailedMedications = allMedications.filter(med => med.status === 'Active');
+  const activeMedications = allMedications.filter(med => med.status === 'Active');
+  
+  // Deduplicate medications by name and dose (keep the most recent one if duplicates exist)
+  const detailedMedications = activeMedications.reduce((unique: DetailedMedication[], med: DetailedMedication) => {
+    const existingIndex = unique.findIndex(
+      m => m.name.toLowerCase() === med.name.toLowerCase() && m.dose === med.dose
+    );
+    if (existingIndex === -1) {
+      unique.push(med);
+    } else {
+      // If duplicate found, keep the one with the most recent start date
+      const existing = unique[existingIndex];
+      const existingDate = new Date(existing.startDate);
+      const newDate = new Date(med.startDate);
+      if (!isNaN(newDate.getTime()) && (isNaN(existingDate.getTime()) || newDate > existingDate)) {
+        unique[existingIndex] = med;
+      }
+    }
+    return unique;
+  }, []);
 
   // Vitals trend - populate from patient vitals data
   const vitalsTrend: VitalReading[] = patient.vitals ? [
