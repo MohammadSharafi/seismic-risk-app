@@ -11,13 +11,23 @@ import '../models/listOfQuestions.dart';
 import '../models/questionary/QuestionaryReqModel.dart';
 import 'package:http/http.dart' as http;
 
+
+Future<String> getUserId() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? userId = prefs.getString('user_id');
+  if (userId == null) {
+    userId = Uuid().v4();
+    await prefs.setString('user_id', userId);
+  }
+  return userId;
+}
+
 class SurveyState extends ChangeNotifier {
   int currentPage = 0;
   int progressbarPage = 0;
-  final List<dynamic> pages;
+   List<dynamic> pages;
   final SurveyAnswer surveyAnswer = SurveyAnswer();
-  final Map<String, TextEditingController> _textControllers =
-      {}; // Added for controllers
+  final Map<String, TextEditingController> _textControllers = {}; // Added for controllers
 
   SurveyState(this.pages);
 
@@ -98,21 +108,14 @@ class SurveyState extends ChangeNotifier {
     final RegExp phoneRegex = RegExp(r'^\+\d{1,5}(?:[\s-]?\d{3,5}){2,3}$');
     return phoneRegex.hasMatch(phoneNumber);
   }
-  Future<String> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString('user_id');
-    if (userId == null) {
-      userId = Uuid().v4();
-      await prefs.setString('user_id', userId);
-    }
-    return userId;
-  }
+
+
+
   void nextPage() {
     if (currentPage < pages.length - 1) {
       currentPage++;
       if (pages[currentPage] is SurveyPageData) {
         progressbarPage++;
-
       }
       notifyListeners();
     }
@@ -128,72 +131,87 @@ class SurveyState extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   List<SurveyPageData> gatherSurveyPageData(List<dynamic> surveyData) {
-    return surveyData.where((item) => item is SurveyPageData).cast<SurveyPageData>().toList();
+    return surveyData
+        .where((item) => item is SurveyPageData)
+        .cast<SurveyPageData>()
+        .toList();
   }
 
-  int myCurrentPageIndex=0;
-  int myCurrentQuestionIndex=0;
+  int myCurrentPageIndex = 0;
+  int myCurrentQuestionIndex = 0;
+
+  sendDataToServer() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      bool allow = prefs.getBool('allow_collect_data') ?? true;
+
+
+        print('Allowing data collection');
+        dynamic answers = surveyAnswer.getAnswer(myCurrentPageIndex, myCurrentQuestionIndex);
+        String name = surveyAnswer.getAnswer(0, 0);
+        String value = '';
+
+        switch (answers.runtimeType) {
+          case String:
+            value = answers.toString();
+            break;
+          case DateTime:
+            value = (answers as DateTime).toString().split(' ')[0];
+            break;
+          case Set:
+            value = (answers as Set).toList().join(',');
+            break;
+          default:
+            value = answers.toString();
+        }
+
+        String userIdentifier = await getUserId();
+
+        sendData(
+            question:
+                gatherSurveyPageData(surveyData(haveEndo: surveyAnswer.getAnswer(2, 0).toString().toUpperCase()=='YES'))[myCurrentPageIndex].questionList.first,
+            questionId:
+                gatherSurveyPageData(surveyData(haveEndo: surveyAnswer.getAnswer(2, 0).toString().toUpperCase()=='YES'))[myCurrentPageIndex].listOfTags.first,
+            answer:((allow)?value: '************'),
+            fullName: name,
+            userIdentifier: userIdentifier);
+
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<void> saveAnswer(
       int pageIndex, int questionIndex, dynamic answer) async {
-    myCurrentPageIndex=pageIndex;
-    myCurrentQuestionIndex=questionIndex;
+    myCurrentPageIndex = pageIndex;
+    myCurrentQuestionIndex = questionIndex;
 
     print('Started saving answer');
     surveyAnswer.setAnswer(pageIndex, questionIndex, answer);
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if(pageIndex==0){
+    if (pageIndex == 0) {
       prefs.setBool('allow_collect_data', true);
     }
 
-  bool allow =  prefs.getBool('allow_collect_data')??true;
-
-  if(allow){
-    print('Allowing data collection');
-    dynamic answers =  surveyAnswer.getAnswer(pageIndex, questionIndex);
-    String name = surveyAnswer.getAnswer(0, 0);
-    String value =  '';
-
-    switch (answers.runtimeType) {
-      case String:
-        value = answer.toString();
-        break;
-      case DateTime:
-        value = (answer as DateTime).toString().split(' ')[0];
-        break;
-      case Set:
-        value = (answer as Set).toList().join(',');
-        break;
-      default:
-        value = answer.toString();
-    }
-
-    String userIdentifier = await getUserId();
-
-    sendData(question: gatherSurveyPageData(surveyData)[pageIndex].questionList.first, questionId: gatherSurveyPageData(surveyData)[pageIndex].listOfTags.first, answer: value, fullName: name, userIdentifier:userIdentifier );
-
-
-  }
-  else{
-    print('Not allowing data collection');
-  }
-
-  if (pageIndex == 1) {
+    if (pageIndex == 1) {
       prefs.setInt(
           'STEP_2',
           calculateAgeFromAnswer((answer is DateTime)
               ? (answer).toString().split(' ')[0]
               : answer.toString()));
+    } else if (pageIndex == 2) {
+      prefs.setBool(
+          'STEP_3', answer.toString().toLowerCase() == 'yes' ? true : false);
+
+      if(answer.toString().toLowerCase() == 'no'){
+        pages=surveyData(haveEndo: false);
+      }
     }
-  else if (pageIndex == 2) {
-      prefs.setBool('STEP_3', answer.toString().toLowerCase() == 'yes' ? true : false);
-  }
     print('Finished saving answer');
-
-
-
-
 
     notifyListeners();
   }
@@ -201,7 +219,6 @@ class SurveyState extends ChangeNotifier {
   dynamic getAnswer(int pageIndex, int questionIndex) {
     return surveyAnswer.getAnswer(pageIndex, questionIndex);
   }
-
 
   TextEditingController getController(int pageIndex, int questionIndex) {
     final key = '$pageIndex-$questionIndex';
@@ -242,26 +259,36 @@ class SurveyState extends ChangeNotifier {
     return age;
   }
 
-  Future<void> sendData({required String question,required String questionId,required String answer,required String fullName, required String userIdentifier}) async {
+  Future<void> sendData(
+      {required String question,
+      required String questionId,
+      required String answer,
+      required String fullName,
+      required String userIdentifier}) async {
     try {
-
+      final  body =jsonEncode({
+        "userIdentifier": "$userIdentifier",
+        "category": "ENDO MASTER CARE PLAN SUBMISSION",
+        "question": "$question",
+        "answer": "$answer",
+        "questionId": "$questionId",
+        "fullName": "$fullName"
+      });
       final response = await http.post(
-        Uri.parse('https://api-dev.march.health/monomarch/api/v1/webhooks/on-create-endo-master-care-plan-submissions'),
+        Uri.parse(
+            'https://api.march.health/monomarch/api/v1/webhooks/on-create-endo-master-care-plan-submissions'),
         headers: {
           "ngrok-skip-browser-warning": "69420",
-          "on-create-endo-master-care-plan-submission-api-key": "Tz70zitgtytNFYPvkPUsSFhGTRSlYHTCBrjjCQGu4V7ZH7LIFnzREjSXPz0yITtZ",
+          "on-create-endo-master-care-plan-submission-api-key":
+              "Tz70zitgtytNFYPvkPUsSFhGTRSlYHTCBrjjCQGu4V7ZH7LIFnzREjSXPz0yITtZ",
+          'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          "userIdentifier": "$userIdentifier",
-          "category": "ENDO MASTER CARE PLAN SUBMISSION",
-          "question": "$question",
-          "answer": "$answer",
-          "questionId": "$questionId",
-          "fullName": "$fullName"
-        }),
+        body:body,
       );
+      print('Request Body: $body');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        print('Data sent successfully ${response.body}');
       } else {
         throw Exception(
             'Failed to send data: ${response.statusCode} - ${response.body}');
@@ -273,8 +300,7 @@ class SurveyState extends ChangeNotifier {
 
   QuestionaryReqModel submitSurvey() {
     final List<UserQuestionary> userQuestionaryList = [];
-    final List<SurveyPageData> surveyPages =
-        pages.whereType<SurveyPageData>().toList();
+    final List<SurveyPageData> surveyPages = pages.whereType<SurveyPageData>().toList();
 
     for (int pageIndex = 0; pageIndex <= surveyPages.length - 1; pageIndex++) {
       final pageData = surveyPages[pageIndex];

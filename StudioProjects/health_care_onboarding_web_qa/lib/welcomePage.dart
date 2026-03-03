@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:health_care_onboarding_web_qa/march_style/march_icons.dart';
 import 'package:health_care_onboarding_web_qa/questionary/components/buttons.dart';
+import 'package:health_care_onboarding_web_qa/questionary/controllers/question_controller.dart';
 import 'package:health_care_onboarding_web_qa/routes/router.dart';
+import 'package:http/http.dart' as http;
 
 
 
@@ -67,6 +71,13 @@ class WelcomePage extends StatelessWidget {
                   MarchButton(
                     btnText: 'Start My Journey',
                     btnCallBack: () async {
+                      String userIdentifier = await getUserId();
+                      sendData(
+                          question:'start page',
+                          questionId:'',
+                          answer:'STARTED' ,
+                          fullName: 'N/A',
+                          userIdentifier: userIdentifier);
                       AutoRouter.of(context).push(SurveyRoute());
                     },
                     buttonSize: ButtonSize.LARG,
@@ -86,4 +97,49 @@ class WelcomePage extends StatelessWidget {
       ],
     );
   }
+
+
+  Future<void> sendData(
+      {required String question,
+        required String questionId,
+        required String answer,
+        required String fullName,
+        required String userIdentifier}) async {
+    try {
+      final  body =jsonEncode({
+        "userIdentifier": "$userIdentifier",
+        "category": "WELCOME PAGE",
+        "question": "$question",
+        "answer": "$answer",
+        "questionId": "$questionId",
+        "fullName": "$fullName"
+      });
+      final response = await http.post(
+        Uri.parse(
+            'https://api.march.health/monomarch/api/v1/webhooks/on-create-endo-master-care-plan-submissions'),
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          "on-create-endo-master-care-plan-submission-api-key":
+          "Tz70zitgtytNFYPvkPUsSFhGTRSlYHTCBrjjCQGu4V7ZH7LIFnzREjSXPz0yITtZ",
+          'Content-Type': 'application/json',
+        },
+        body:body,
+      );
+      print('Request Body: $body');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('Data sent successfully ${response.body}');
+      } else {
+        throw Exception(
+            'Failed to send data: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+
+
+
 }
+

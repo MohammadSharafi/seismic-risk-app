@@ -22,15 +22,45 @@ void main() async {
   await init();
 
   runApp(
-    shouldEnableDevicePreview()
-        ? DevicePreview(
+    PreDevicePreviewWrapper(themeController: themeController),
+
+  );
+}
+
+
+class PreDevicePreviewWrapper extends StatelessWidget {
+  final ThemeController themeController;
+
+  const PreDevicePreviewWrapper({required this.themeController, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // We use LayoutBuilder to get screen width
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
+
+        if (!isSmallScreen && shouldEnableDevicePreview()) {
+          return DevicePreview(
             enabled: true,
             isToolbarVisible: false,
             builder: (context) => App(themeController),
-          )
-        : App(themeController),
-  );
+          );
+        } else {
+          return App(themeController);
+        }
+      },
+    );
+  }
 }
+
+
+
+
+
+
+
+
 
 bool shouldEnableDevicePreview() {
   // Enable DevicePreview only if running on the web or a desktop platform
@@ -75,7 +105,7 @@ class _AppState extends State<App> {
         builder: (BuildContext context, Widget? child) {
           final router = getIt<AppRouter>();
           return MaterialApp.router(
-            title: 'March',
+            title: 'Endometriosis Master Care Program',
             key: App.navigatorKey,
             theme: marchMainThemeLight(themeController),
             themeMode: themeController.themeMode,

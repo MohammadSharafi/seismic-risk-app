@@ -1,0 +1,212 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes traffic-edge-dash {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+/* Ensure React Flow zoom/fit controls and panels are clickable (above pane) */
+.traffic-inspector-graph .react-flow__panel {
+  pointer-events: auto;
+  z-index: 10;
+}
+.traffic-inspector-graph .react-flow__controls,
+.traffic-inspector-graph .react-flow__controls-button {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+/* Ensure diagram area receives pan/zoom (drag and scroll) */
+.traffic-inspector-graph .react-flow__renderer,
+.traffic-inspector-graph .react-flow__pane {
+  pointer-events: auto;
+  touch-action: none;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #0f7283;
+  --primary-foreground: oklch(1 0 0);
+  --secondary: #f0f7ff;
+  --secondary-foreground: #0f7283;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.96 0.008 264);
+  --sidebar-foreground: oklch(0.2 0.01 264);
+  --sidebar-primary: #0f7283;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: #e0f2f9;
+  --sidebar-accent-foreground: #0f5a68;
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* Lighter dark mode – soft charcoal instead of pure black */
+.dark {
+  --background: oklch(0.28 0.01 264);
+  --foreground: oklch(0.92 0.01 264);
+  --card: oklch(0.32 0.012 264);
+  --card-foreground: oklch(0.92 0.01 264);
+  --popover: oklch(0.32 0.012 264);
+  --popover-foreground: oklch(0.92 0.01 264);
+  --primary: #4aaabd;
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.38 0.02 264);
+  --secondary-foreground: oklch(0.92 0.01 264);
+  --muted: oklch(0.4 0.015 264);
+  --muted-foreground: oklch(0.68 0.02 264);
+  --accent: oklch(0.4 0.02 264);
+  --accent-foreground: oklch(0.92 0.01 264);
+  --destructive: oklch(0.5 0.18 25);
+  --destructive-foreground: oklch(0.98 0.02 25);
+  --border: oklch(0.42 0.02 264);
+  --input: oklch(0.35 0.02 264);
+  --input-background: oklch(0.35 0.02 264);
+  --switch-background: oklch(0.45 0.02 264);
+  --ring: oklch(0.55 0.08 200);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: oklch(0.65 0.22 264);
+  --chart-2: oklch(0.72 0.18 162);
+  --chart-3: oklch(0.78 0.2 70);
+  --chart-4: oklch(0.72 0.24 303);
+  --chart-5: oklch(0.75 0.22 16);
+  --sidebar: oklch(0.26 0.012 264);
+  --sidebar-foreground: oklch(0.92 0.01 264);
+  --sidebar-primary: #4aaabd;
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.38 0.02 264);
+  --sidebar-accent-foreground: oklch(0.92 0.01 264);
+  --sidebar-border: oklch(0.4 0.02 264);
+  --sidebar-ring: oklch(0.55 0.08 200);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  /* Improved typography */
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground transition-colors;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  h2 {
+    @apply text-2xl font-bold tracking-tight;
+  }
+
+  h3 {
+    @apply text-xl font-semibold;
+  }
+
+  h4 {
+    @apply text-lg font-semibold;
+  }
+
+  /* Selection color */
+  *::selection {
+    @apply bg-teal-200 dark:bg-teal-800/50 text-foreground;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-600 rounded-full hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors;
+  }
+
+  /* Input and button focus states */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply outline-none ring-2 ring-primary ring-offset-2 dark:ring-offset-background;
+  }
+
+  /* Base font size */
+  html {
+    font-size: var(--font-size);
+  }
+}

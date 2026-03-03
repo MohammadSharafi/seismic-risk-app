@@ -278,7 +278,7 @@ export function ClinicalDiscussion({ patient, visitId, onClose, onViewVisit, log
       }
 
       const result = await response.json();
-      
+
       // Update session ID if provided
       if (result.data?.sessionId) {
         setSessionId(result.data.sessionId);
@@ -286,7 +286,7 @@ export function ClinicalDiscussion({ patient, visitId, onClose, onViewVisit, log
 
       // Remove waiting message
       setMessages(prev => prev.filter(msg => msg.id !== waitingMessageId));
-      
+
       // Add AI response message (not saved to BigQuery - ephemeral chat)
       const aiResponseText = result.data?.response || result.response || result.data?.message || result.message;
       if (aiResponseText && aiResponseText.trim() && aiResponseText !== 'null') {
@@ -295,9 +295,9 @@ export function ClinicalDiscussion({ patient, visitId, onClose, onViewVisit, log
           speaker: 'ai',
           speakerName: 'AI Clinical Assistant',
           speakerRole: 'AI Assistant',
-          timestamp: new Date().toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
+          timestamp: new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
             year: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
@@ -314,9 +314,9 @@ export function ClinicalDiscussion({ patient, visitId, onClose, onViewVisit, log
           id: `error_${Date.now()}`,
           speaker: 'ai',
           speakerName: 'System',
-          timestamp: new Date().toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
+          timestamp: new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
             year: 'numeric',
             hour: 'numeric',
             minute: '2-digit',

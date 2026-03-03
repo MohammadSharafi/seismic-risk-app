@@ -1,0 +1,26 @@
+# Secrets
+mo_accessKeys.csv
+*accessKeys*.csv
+jwt_private_key.pem
+jwt_public_key.pem
+
+# Env (keep .env.example)
+web/.env
+web/.env.dev
+web/.env.development
+web/.env.prod
+web/.env.production
+web/.env.staging
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.venv_bedrock/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store

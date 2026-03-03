@@ -20,7 +20,7 @@ Widget marchButton(
     child: Text(
       text,
       style: GoogleFonts.arimo(
-        fontSize: 13,
+        fontSize: 17,
         color: Colors.black,
         fontWeight: FontWeight.w400,
       ), // Custom text style),

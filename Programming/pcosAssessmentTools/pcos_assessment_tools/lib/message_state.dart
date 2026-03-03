@@ -72,6 +72,8 @@ enum QuestionType {
   numberSelector,
   slider,
   nextStep,
+  loading,
+
 }
 
 

@@ -123,25 +123,6 @@ export function BackgroundMonitoring({ patient }: BackgroundMonitoringProps) {
         <p className="text-sm text-gray-600">Automated monitoring status and escalation history</p>
       </div>
 
-      {/* Monitoring Status Card */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="text-sm font-medium text-gray-900 mb-3">Monitoring Status</div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Last Check:</span>
-            <span className="text-sm text-gray-900 font-medium">
-              {formatDateTime(status?.last_check || status?.last_run_time)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Current State:</span>
-            <span className={`px-2 py-1 text-xs font-medium rounded ${getStateColor(status?.current_state)}`}>
-              {status?.current_state || 'Unknown'}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Active Status Indicator */}
       {status?.is_active && (
         <div className="bg-green-50 rounded-lg border border-green-200 p-4">

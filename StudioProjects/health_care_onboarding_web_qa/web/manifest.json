@@ -1,16 +1,35 @@
 {
-    "name": "Health Care Onboarding",
-    "short_name": "HealthCare",
-    "start_url": "/",
+    "name": "Endometriosis Master Care Program",
+    "short_name": "March Health",
+    "start_url": ".",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#000000",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "Join March Health’s 30-day Endometriosis Care Pilot to get a personalized care plan, health coaching, and symptom tracking. Start your journey to better women’s health today!",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
             "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
-    ],
-    "routes": ["/", "/success", "/cancel"]
+    ]
 }

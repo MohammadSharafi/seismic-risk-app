@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { CheckCircle, Circle, ArrowRight, Brain, User, FileCheck, AlertCircle, Clock, Edit, Trash2, Plus, FileText, Download, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import { CheckCircle, Circle, ArrowRight, Brain, User, FileCheck, AlertCircle, Clock, FileText, Download, ChevronDown, ChevronUp, X, ShieldAlert } from 'lucide-react';
 import { Patient } from '../App';
 import { RiskBadge } from './RiskBadge';
+import { MarkdownText, normalizeMarkdown } from './MarkdownText';
 import { API_BASE_URL } from '../src/config';
 import jsPDF from 'jspdf';
 
@@ -46,6 +49,71 @@ interface ProcedureRecommendation {
   rationale: string;
   evidence: string[];
   status: string; // Original status from LLM (e.g., "Planned", "Consider", "Order", etc.)
+  cptCode?: string; // Procedure code (CPT) from API
+}
+
+type DrugInteractionPair = { drugA: string; drugB: string; interactionTexts: string[] };
+
+/** Matches [1], [2], [1, 2], [1, 2, 4] etc. */
+const CITATION_RE = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
+
+function escapeHtmlAttr(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * Renders rag_results (or any text) with [1], [2], [1, 2] as inline citation circles
+ * so references stay in the text flow (no newline before the circle).
+ */
+function RagResultsWithCitations({
+  text,
+  references = [],
+  className = '',
+  compact = false,
+}: {
+  text: string;
+  references?: Array<{ index?: number; source?: string }>;
+  className?: string;
+  compact?: boolean;
+}) {
+  const getRef = (index: number) =>
+    references.find((r) => Number(r.index) === index);
+
+  const normalized = normalizeMarkdown(typeof text === 'string' ? text : '');
+  // Replace [1], [2], [1, 2] with inline HTML so they render in the same line as the text
+  const withInlineCitations = normalized.replace(CITATION_RE, (_, nums: string) => {
+    const indices = nums.split(/\s*,\s*/).map((s) => parseInt(s.trim(), 10)).filter((n) => !Number.isNaN(n));
+    if (!indices.length) return '';
+    const circles = indices.map((index) => {
+      const rawSource = getRef(index)?.source ?? 'No source';
+      const tooltip = escapeHtmlAttr(`Reference ${index}: ${rawSource}`);
+      return `<span class="citation-inline" data-source="${tooltip}" role="button" tabindex="0" aria-label="Citation ${index}">${index}</span>`;
+    });
+    return circles.join('<span class="inline-block w-0.5 shrink-0" aria-hidden="true"></span>');
+  });
+
+  const markdownComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => <p className="mb-2 last:mb-0 text-inherit leading-relaxed markdown-p">{children}</p>,
+    strong: ({ children }: { children?: React.ReactNode }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+    ul: ({ children }: { children?: React.ReactNode }) => <ul className="list-disc list-inside mb-2 space-y-0.5 pl-2 markdown-ul">{children}</ul>,
+    ol: ({ children }: { children?: React.ReactNode }) => <ol className="list-decimal list-inside mb-2 space-y-0.5 pl-2 markdown-ol">{children}</ol>,
+    li: ({ children }: { children?: React.ReactNode }) => <li className="text-inherit leading-relaxed">{children}</li>,
+    em: ({ children }: { children?: React.ReactNode }) => <em>{children}</em>,
+  };
+
+  if (!withInlineCitations.trim()) return <span className={className} />;
+
+  return (
+    <div className={`markdown-content text-inherit ${className} ${compact ? 'space-y-0 markdown-compact' : ''}`}>
+      <ReactMarkdown rehypePlugins={[rehypeRaw]} components={markdownComponents}>
+        {withInlineCitations.trim()}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDiscussion, visitTrigger, discussionReferenced, loggedInPractitioner }: VisitAnalysisFlowProps) {
@@ -53,7 +121,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
   const [flowStatus, setFlowStatus] = useState<'not-started' | 'in-progress' | 'completed'>('not-started');
   const [analysisRun, setAnalysisRun] = useState(false);
   const [aiRecommendation, setAiRecommendation] = useState<{
-    riskTier: 'Low' | 'Medium' | 'High';
+    riskTier: 'Low' | 'Medium' | 'High' | 'Critical';
     reasoning: string[];
     confidence?: string;
     reasoningReferences?: Array<{type: string; label: string; source: string}>;
@@ -85,26 +153,105 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
   } | null>(null);
   const [summaryText, setSummaryText] = useState<string | null>(null);
   const [openRisks, setOpenRisks] = useState<any[]>([]);
-  const [editingMedicationId, setEditingMedicationId] = useState<string | null>(null);
-  const [editingProcedureId, setEditingProcedureId] = useState<string | null>(null);
+  // Clinical Watchlist: time-sensitive / time-insensitive sections collapsed by default
+  const [riskTimeSensitiveOpen, setRiskTimeSensitiveOpen] = useState(false);
+  const [riskTimeInsensitiveOpen, setRiskTimeInsensitiveOpen] = useState(false);
   // Expand/collapse states for Step 3 cards
   const [expandedDiagnosis, setExpandedDiagnosis] = useState<Set<number>>(new Set());
   const [expandedMedications, setExpandedMedications] = useState<Set<string>>(new Set());
   const [expandedProcedures, setExpandedProcedures] = useState<Set<string>>(new Set());
   const [expandedRiskAssessment, setExpandedRiskAssessment] = useState(false);
   const [expandedAdditionalRecs, setExpandedAdditionalRecs] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<{type: 'medication' | 'procedure', id: string} | null>(null);
-  const [addingMedication, setAddingMedication] = useState(false);
-  const [addingProcedure, setAddingProcedure] = useState(false);
+  const [evidenceSummaryModal, setEvidenceSummaryModal] = useState<{ title: string; content: string; references?: Array<{ index?: number; source?: string }> } | null>(null);
   // Start with empty arrays - will be populated from LLM response in Step 3
   const [medications, setMedications] = useState<MedicationRecommendation[]>([]);
   const [procedures, setProcedures] = useState<ProcedureRecommendation[]>([]);
+  // Drug interactions among recommended medications (section below Medications)
+  const [drugInteractionsSection, setDrugInteractionsSection] = useState<
+    'idle' | 'loading' | { pairs: DrugInteractionPair[] } | { error: true }
+  >('idle');
 
-  // Edit state for medications
-  const [medEditForm, setMedEditForm] = useState<Partial<MedicationRecommendation>>({});
-  
-  // Edit state for procedures
-  const [procEditForm, setProcEditForm] = useState<Partial<ProcedureRecommendation>>({});
+  // Toggle functions for expand/collapse
+  const toggleDiagnosis = (idx: number) => {
+    setExpandedDiagnosis(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(idx)) {
+        newSet.delete(idx);
+      } else {
+        newSet.add(idx);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleMedication = (id: string) => {
+    setExpandedMedications(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleProcedure = (id: string) => {
+    setExpandedProcedures(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  // Load drug interactions among recommended medications (run when medications list is set)
+  useEffect(() => {
+    const names = medications.map((m) => m.medication.trim()).filter(Boolean);
+    if (names.length === 0) {
+      setDrugInteractionsSection('idle');
+      return;
+    }
+    const recommendedSet = new Set(names.map((n) => n.toLowerCase()));
+    const nameByLower = new Map<string, string>();
+    names.forEach((n) => nameByLower.set(n.toLowerCase(), n));
+    setDrugInteractionsSection('loading');
+    Promise.all(
+      names.map((drugName) =>
+        fetch(`${API_BASE_URL}/drug-interactions?drug=${encodeURIComponent(drugName)}`)
+          .then((r) => r.json())
+          .then((res) => {
+            const data = res?.data ?? res;
+            const interactionTexts: string[] = data?.interactionTexts ?? [];
+            const mentionedDrugs: string[] = data?.mentionedDrugs ?? [];
+            const others = mentionedDrugs
+              .filter(
+                (d) => d && recommendedSet.has(d.trim().toLowerCase()) && d.trim().toLowerCase() !== drugName.toLowerCase()
+              )
+              .map((d) => nameByLower.get(d.trim().toLowerCase()) ?? d.trim());
+            return { drug: drugName, others: [...new Set(others)], interactionTexts };
+          })
+          .catch(() => ({ drug: drugName, others: [] as string[], interactionTexts: [] as string[] }))
+      )
+    )
+      .then((results) => {
+        const pairKeys = new Set<string>();
+        const pairs: DrugInteractionPair[] = [];
+        results.forEach((r) => {
+          r.others.forEach((other) => {
+            const key = [r.drug.toLowerCase(), other.toLowerCase()].sort().join('|');
+            if (pairKeys.has(key)) return;
+            pairKeys.add(key);
+            pairs.push({ drugA: r.drug, drugB: other, interactionTexts: r.interactionTexts });
+          });
+        });
+        setDrugInteractionsSection({ pairs });
+      })
+      .catch(() => setDrugInteractionsSection({ error: true }));
+  }, [medications]);
 
   // Normalize risk tier to only allow Low, Medium, High, or Critical
   const normalizeRiskTier = (tier: string | undefined | null): 'Low' | 'Medium' | 'High' | 'Critical' => {
@@ -215,11 +362,34 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
       }
       
       const result = await response.json();
-      const aiResponse = result.data;
+      // Support both wrapped { data: ... } and direct payload
+      const aiResponse = result?.data ?? result;
+      if (!aiResponse) {
+        throw new Error('No assessment data received from server');
+      }
       
       // Normalize risk tier from LLM response
       const normalizedRiskTier = normalizeRiskTier(aiResponse.ai_recommendation?.risk_tier || patient.riskTier);
       
+      // Normalize differential_diagnosis so UI always has rag_results, diagnosis_code, and references (snake_case from API)
+      // references: from LLM or backend fallback (populated from [1], [2] in rag_results when LLM returns null)
+      const rawDiagnosis = aiResponse.differential_diagnosis || [];
+      const differentialDiagnosis = rawDiagnosis.map((d: any) => {
+        const ragResults = (d.rag_results ?? d.ragResults ?? '').toString().trim();
+        const refs: Array<{ index?: number; source?: string }> = Array.isArray(d.references) ? d.references : [];
+        return {
+          ...d,
+          diagnosis_name: d.diagnosis_name ?? d.diagnosisName,
+          diagnosis_code: (d.diagnosis_code ?? d.diagnosisCode ?? '').toString().trim(),
+          rag_results: ragResults,
+          ragResults,
+          supporting_evidence: d.supporting_evidence ?? d.supportingEvidence ?? [],
+          probability_bin: d.probability_bin ?? d.probabilityBin,
+          confidence_score: d.confidence_score ?? d.confidenceScore,
+          references: refs,
+        };
+      });
+
       // Update AI recommendation with response
       setAiRecommendation({
         riskTier: normalizedRiskTier,
@@ -234,7 +404,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
         procedureRecommendations: aiResponse.procedure_recommendations || [],
         additionalRecommendations: aiResponse.additional_recommendations || [],
         riskAssessment: aiResponse.risk_assessment || null,
-        differentialDiagnosis: aiResponse.differential_diagnosis || [],
+        differentialDiagnosis,
       });
       
       // Also update selected risk tier to match AI recommendation initially
@@ -269,8 +439,9 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
           timing: proc.timing || '',
           rationale: proc.rationale || '',
           evidence: Array.isArray(proc.reasoning) ? proc.reasoning : (proc.reasoning ? [proc.reasoning] : []),
-          status: proc.status || 'Unknown', // Keep original status from LLM
-          priority: proc.priority || ''
+          status: proc.status || 'Unknown',
+          priority: proc.priority || '',
+          cptCode: (proc.cpt_code ?? proc.cptCode ?? '').toString().trim() || undefined,
         }));
         setProcedures(procs);
       } else {
@@ -386,9 +557,9 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
         as_of_time_utc: now,
         created_at_override_utc: null,
         doctor_decision: {
-          final_risk_tier: selectedRiskTier,
+          final_risk_tier: aiRecommendation.riskTier,
           ai_risk_tier: aiRecommendation.riskTier,
-          risk_tier_override: selectedRiskTier !== aiRecommendation.riskTier,
+          risk_tier_override: false,
           reasoning_notes: reasoningNotes,
           doctor_id: loggedInPractitioner?.id || 'unknown',
           doctor_name: loggedInPractitioner?.name || 'Unknown Doctor',
@@ -462,7 +633,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
         
         // Default: 7 days from now based on risk tier
         // Higher risk = shorter follow-up interval
-        const daysUntilFollowUp = selectedRiskTier === 'High' ? 3 : selectedRiskTier === 'Medium' ? 7 : 14;
+        const daysUntilFollowUp = aiRecommendation.riskTier === 'High' ? 3 : aiRecommendation.riskTier === 'Medium' ? 7 : 14;
         const followUpDate = new Date();
         followUpDate.setDate(followUpDate.getDate() + daysUntilFollowUp);
         return followUpDate.toLocaleDateString('en-US', { 
@@ -500,8 +671,8 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
       setDoctorDecision({
         approved: true,
         timestamp: new Date().toLocaleString(),
-        riskTier: selectedRiskTier,
-        planSummary: `${activeMeds} medication adjustment${activeMeds !== 1 ? 's' : ''}, ${activeProcs} procedure/order${activeProcs !== 1 ? 's' : ''}`,
+        riskTier: aiRecommendation.riskTier,
+        planSummary: `${activeMeds} medication adjustment${activeMeds !== 1 ? 's' : ''}, ${activeProcs} procedure${activeProcs !== 1 ? 's' : ''}`,
         twinSummary: twinSummary, // Store the twin summary response
         followUpDate: calculateFollowUpDate(),
         monitoringStatus: getMonitoringStatus()
@@ -517,118 +688,6 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
   };
 
   // Medication handlers
-  const handleEditMedication = (med: MedicationRecommendation) => {
-    setEditingMedicationId(med.id);
-    setMedEditForm({ ...med });
-  };
-
-  const handleSaveMedication = () => {
-    if (editingMedicationId && medEditForm) {
-      setMedications(medications.map(m => 
-        m.id === editingMedicationId ? { ...m, ...medEditForm } as MedicationRecommendation : m
-      ));
-      setEditingMedicationId(null);
-      setMedEditForm({});
-    }
-  };
-
-  const handleCancelMedicationEdit = () => {
-    setEditingMedicationId(null);
-    setMedEditForm({});
-  };
-
-  const handleDeleteMedication = (id: string) => {
-    setShowDeleteConfirm({ type: 'medication', id });
-  };
-
-  const confirmDelete = () => {
-    if (showDeleteConfirm) {
-      if (showDeleteConfirm.type === 'medication') {
-        setMedications(medications.filter(m => m.id !== showDeleteConfirm.id));
-      } else {
-        setProcedures(procedures.filter(p => p.id !== showDeleteConfirm.id));
-      }
-      setShowDeleteConfirm(null);
-    }
-  };
-
-  const handleAddMedication = () => {
-    setAddingMedication(true);
-    setMedEditForm({
-      id: Date.now().toString(),
-      medication: '',
-      dose: '',
-      frequency: '',
-      duration: '',
-      rationale: '',
-      evidence: [],
-      status: 'Planned' // Default status for new medications
-    });
-  };
-
-  const handleSaveNewMedication = () => {
-    if (medEditForm.medication && medEditForm.dose && medEditForm.frequency && medEditForm.rationale) {
-      setMedications([...medications, medEditForm as MedicationRecommendation]);
-      setAddingMedication(false);
-      setMedEditForm({});
-    }
-  };
-
-  const handleCancelAddMedication = () => {
-    setAddingMedication(false);
-    setMedEditForm({});
-  };
-
-  // Procedure handlers
-  const handleEditProcedure = (proc: ProcedureRecommendation) => {
-    setEditingProcedureId(proc.id);
-    setProcEditForm({ ...proc });
-  };
-
-  const handleSaveProcedure = () => {
-    if (editingProcedureId && procEditForm) {
-      setProcedures(procedures.map(p => 
-        p.id === editingProcedureId ? { ...p, ...procEditForm } as ProcedureRecommendation : p
-      ));
-      setEditingProcedureId(null);
-      setProcEditForm({});
-    }
-  };
-
-  const handleCancelProcedureEdit = () => {
-    setEditingProcedureId(null);
-    setProcEditForm({});
-  };
-
-  const handleDeleteProcedure = (id: string) => {
-    setShowDeleteConfirm({ type: 'procedure', id });
-  };
-
-  const handleAddProcedure = () => {
-    setAddingProcedure(true);
-    setProcEditForm({
-      id: Date.now().toString(),
-      procedure: '',
-      timing: '',
-      rationale: '',
-      evidence: [],
-      status: 'Planned' // Default status for new procedures
-    });
-  };
-
-  const handleSaveNewProcedure = () => {
-    if (procEditForm.procedure && procEditForm.timing && procEditForm.rationale) {
-      setProcedures([...procedures, procEditForm as ProcedureRecommendation]);
-      setAddingProcedure(false);
-      setProcEditForm({});
-    }
-  };
-
-  const handleCancelAddProcedure = () => {
-    setAddingProcedure(false);
-    setProcEditForm({});
-  };
-
   const handleDownloadVisitReport = () => {
     if (!doctorDecision || !aiRecommendation) {
       console.error('Cannot generate report: Missing decision or AI recommendation data');
@@ -824,7 +883,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
       checkPageBreak(20);
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text('Procedure/Order Recommendations:', margin, yPos);
+      doc.text('Procedure Recommendations:', margin, yPos);
       yPos += 10;
 
       procedures.forEach((proc: ProcedureRecommendation, idx: number) => {
@@ -965,11 +1024,11 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
     <div>
       {/* Visit Trigger / Intent */}
       {visitTrigger && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Visit Trigger</div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded">
+              <span className="px-3 py-1.5 bg-blue-100 text-blue-800 text-sm font-medium rounded-lg">
                 {visitTrigger.type}
               </span>
               <span className="text-xs text-gray-500">•</span>
@@ -983,8 +1042,8 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
         </div>
       )}
 
-      {/* Progress Indicator */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+      {/* Progress Indicator: current step shows number in circle; completed show checkmark; "Step X of 4" kept */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 mb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-semibold text-gray-900 mb-1">Clinical Workflow Progress</h3>
@@ -1011,8 +1070,8 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
           </div>
         </div>
 
-        {/* Step Indicators */}
-        <div className="flex items-center justify-between">
+        {/* Step indicators: completed = checkmark; current = step number in circle; upcoming = gray circle */}
+        <div className="flex items-center justify-between gap-2">
           {steps.map((step, idx) => (
             <div key={step.number} className="flex items-center flex-1">
               <div className="flex flex-col items-center">
@@ -1023,12 +1082,10 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                 }`}>
                   {currentStep > step.number ? (
                     <CheckCircle className="w-5 h-5 text-white" />
+                  ) : currentStep === step.number ? (
+                    <span className="text-sm font-medium text-white">{step.number}</span>
                   ) : (
-                    <span className={`text-sm font-medium ${
-                      currentStep === step.number ? 'text-white' : 'text-gray-500'
-                    }`}>
-                      {step.number}
-                    </span>
+                    <div className="w-2.5 h-2.5 bg-gray-400 rounded-full" aria-hidden />
                   )}
                 </div>
                 <div className={`text-xs text-center max-w-[120px] ${
@@ -1049,25 +1106,17 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
       </div>
 
       {/* Step Content */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        {/* Step 1: Review Patient State */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        {/* Patient State */}
         {currentStep === 1 && (
-          <div>
-            <div className="mb-4">
-              <h3 className="font-semibold text-gray-900">Step 1: Patient State</h3>
-              <p className="text-sm text-gray-600">Snapshot of current problems, medications, and latest vitals.</p>
+          <div className="p-6 md:p-8">
+            <div className="mb-8 pb-5 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Patient State</h3>
+              <p className="text-sm text-gray-500 mt-2">Snapshot of current problems, medications, and latest vitals.</p>
             </div>
             
-            <div className="space-y-4 mb-6">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium text-gray-700 mb-2">Current Status</div>
-                <div className="flex items-center gap-3">
-                  <RiskBadge tier={patient.riskTier} size="md" />
-                  <span className="text-sm text-gray-600">Last evaluation: {patient.lastEvaluation}</span>
-                </div>
-              </div>
-
-              <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="space-y-5 mb-6">
+              <div className="p-6 bg-gray-50/80 rounded-xl border border-gray-100">
                 <div className="text-sm font-medium text-gray-700 mb-2">Key Clinical Indicators</div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-sm">
@@ -1093,16 +1142,16 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                 </div>
               </div>
 
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="p-6 bg-blue-50/90 border border-blue-100 rounded-xl">
                 <div className="text-sm text-blue-900">
-                  <div className="font-medium mb-1">Ready to proceed</div>
-                  <div className="text-blue-800">Patient data is current and complete. You may proceed to AI analysis.</div>
+                  <div className="font-medium mb-2">Ready to proceed</div>
+                  <div className="text-blue-800/90">Patient data is current and complete. You may proceed to AI analysis.</div>
                 </div>
               </div>
             </div>
 
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-5 p-5 bg-red-50 border border-red-200 rounded-xl">
                 <div className="text-sm text-red-900">
                   <div className="font-medium mb-1">Error</div>
                   <div className="text-red-800">{error}</div>
@@ -1113,7 +1162,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
             <button
               onClick={handleRunAnalysis}
               disabled={loadingData}
-              className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md shadow-blue-600/20"
             >
               {loadingData ? (
                 <>
@@ -1131,42 +1180,23 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
           </div>
         )}
 
-        {/* Step 2: AI Analysis Running */}
+        {/* Data Fetched */}
         {currentStep === 2 && !aiRecommendation && (
-          <div>
-            <div className="mb-4">
-              <div className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-purple-600" />
-                <h3 className="font-semibold text-gray-900">Step 2: Data Fetched</h3>
-                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded">
+          <div className="p-6 md:p-8">
+            <div className="mb-8 pb-5 border-b border-gray-100">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Data Fetched</h3>
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
                   Ready
                 </span>
               </div>
-              <p className="text-sm text-gray-600">Patient data has been fetched. Review the summary below and proceed to generate AI recommendations.</p>
+              <p className="text-sm text-gray-500 mt-2">Review the summary below and proceed to generate AI recommendations.</p>
             </div>
 
             {dataFetchSummary && (
-              <div className="space-y-4 mb-6">
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="text-sm font-medium text-gray-700 mb-3">Data Fetched Summary</div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-700">{dataFetchSummary.alarms}</div>
-                      <div className="text-xs text-gray-600 mt-1">Alarms</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-700">{dataFetchSummary.riskFactors}</div>
-                      <div className="text-xs text-gray-600 mt-1">Risk Factors</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-700">{dataFetchSummary.twinSummaries}</div>
-                      <div className="text-xs text-gray-600 mt-1">Twin Summaries</div>
-                    </div>
-                  </div>
-                </div>
-
+              <div className="space-y-5 mb-6">
                 {assessmentInputData?.patient_snapshot && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="p-6 bg-gray-50/80 rounded-xl border border-gray-100">
                     <div className="text-sm font-medium text-gray-700 mb-2">Patient Snapshot</div>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
@@ -1197,12 +1227,114 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                   </div>
                 )}
 
+                {/* Risk Factors */}
+                {(() => {
+                  const risks = (openRisks && openRisks.length > 0 ? openRisks : assessmentInputData?.risk_factor) || [];
+                  if (risks.length === 0) return null;
+                  const timeSensitive = risks.filter((r: any) => (r.risk_factor_type || r.type) === 'TIME_SENSITIVE');
+                  const timeInsensitive = risks.filter((r: any) => (r.risk_factor_type || r.type) === 'TIME_INSENSITIVE');
+                  const other = risks.filter((r: any) => !['TIME_SENSITIVE', 'TIME_INSENSITIVE'].includes(r.risk_factor_type || r.type));
+                  return (
+                    <div className="rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50/90 to-orange-50/60 overflow-hidden">
+                      <div className="px-5 py-4 border-b border-amber-100/80 flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-amber-100/80">
+                          <ShieldAlert className="w-5 h-5 text-amber-700" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-900">Clinical Watchlist Indicators</h4>
+                          <p className="text-xs text-gray-500">
+                            {risks.length} active indicator{risks.length !== 1 ? 's' : ''}
+                            {timeSensitive.length > 0 && ` · ${timeSensitive.length} care gaps`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-4">
+                        {timeSensitive.length > 0 && (
+                          <div className="border border-amber-200/60 rounded-lg overflow-hidden bg-white/50">
+                            <button
+                              type="button"
+                              onClick={() => setRiskTimeSensitiveOpen(prev => !prev)}
+                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left hover:bg-amber-50/80 transition-colors"
+                            >
+                              <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                              <span className="text-xs font-medium uppercase tracking-wide text-amber-700">Care Gaps</span>
+                              <span className="text-xs text-amber-600 ml-1">({timeSensitive.length})</span>
+                              {riskTimeSensitiveOpen ? <ChevronUp className="w-4 h-4 text-amber-600 ml-auto" /> : <ChevronDown className="w-4 h-4 text-amber-600 ml-auto" />}
+                            </button>
+                            {riskTimeSensitiveOpen && (
+                              <div className="grid gap-2 px-3 pb-3 pt-0">
+                                {timeSensitive.map((risk: any, idx: number) => (
+                                  <div
+                                    key={risk.risk_factor_id || idx}
+                                    className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-lg bg-white/80 border border-amber-200/60 shadow-sm"
+                                  >
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {risk.description || '—'}
+                                    </span>
+                                    {risk.overdue_days != null && (
+                                      <span className="text-xs font-medium text-amber-800 bg-amber-100 px-2 py-0.5 rounded flex-shrink-0">
+                                        {risk.overdue_days}d overdue
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {timeInsensitive.length > 0 && (
+                          <div className="border border-gray-200 rounded-lg overflow-hidden bg-white/50">
+                            <button
+                              type="button"
+                              onClick={() => setRiskTimeInsensitiveOpen(prev => !prev)}
+                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left hover:bg-gray-50 transition-colors"
+                            >
+                              <ShieldAlert className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                              <span className="text-xs font-medium uppercase tracking-wide text-gray-600">Baseline Indicators</span>
+                              <span className="text-xs text-gray-500 ml-1">({timeInsensitive.length})</span>
+                              {riskTimeInsensitiveOpen ? <ChevronUp className="w-4 h-4 text-gray-500 ml-auto" /> : <ChevronDown className="w-4 h-4 text-gray-500 ml-auto" />}
+                            </button>
+                            {riskTimeInsensitiveOpen && (
+                              <div className="grid gap-2 px-3 pb-3 pt-0">
+                                {timeInsensitive.map((risk: any, idx: number) => (
+                                  <div
+                                    key={risk.risk_factor_id || idx}
+                                    className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-lg bg-white/70 border border-gray-200 shadow-sm"
+                                  >
+                                    <span className="text-sm font-medium text-gray-800">
+                                      {risk.description || '—'}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {other.length > 0 && (
+                          <div className="grid gap-2">
+                            {other.map((risk: any, idx: number) => (
+                              <div
+                                key={risk.risk_factor_id || idx}
+                                className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-lg bg-white/70 border border-gray-200 shadow-sm"
+                              >
+                                <span className="text-sm font-medium text-gray-800">
+                                  {risk.description || '—'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Current Summary Text */}
                 {summaryText && (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="text-sm font-medium text-gray-700 mb-2">Current Clinical Summary</div>
-                    <div className="text-sm text-gray-700 whitespace-pre-wrap max-h-60 overflow-y-auto">
-                      {summaryText}
+                  <div className="p-6 bg-blue-50/90 border border-blue-100 rounded-xl">
+                    <div className="text-sm font-medium text-gray-700 mb-3">Current Clinical Summary</div>
+                    <div className="text-sm text-gray-700 max-h-60 overflow-y-auto break-words min-w-0">
+                      <MarkdownText>{summaryText}</MarkdownText>
                     </div>
                   </div>
                 )}
@@ -1210,7 +1342,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
             )}
 
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-5 p-5 bg-red-50 border border-red-200 rounded-xl">
                 <div className="text-sm text-red-900">
                   <div className="font-medium mb-1">Error</div>
                   <div className="text-red-800">{error}</div>
@@ -1221,7 +1353,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
             <button
               onClick={handleReviewAI}
               disabled={loadingAI || !assessmentInputData}
-              className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md shadow-blue-600/20"
             >
               {loadingAI ? (
                 <>
@@ -1239,51 +1371,50 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
           </div>
         )}
 
-        {/* Step 2: AI Clinical Assessment (Results) */}
+        {/* AI Clinical Assessment (Results) */}
         {currentStep === 2 && aiRecommendation && (
-          <div>
-            <div className="mb-4">
-              <div className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-purple-600" />
-                <h3 className="font-semibold text-gray-900">Step 2: AI Clinical Assessment</h3>
-                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+          <div className="p-6 md:p-8">
+            <div className="mb-8 pb-5 border-b border-gray-100">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h3 className="text-lg font-semibold text-gray-900 tracking-tight">AI Clinical Assessment</h3>
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
                   Assistive
                 </span>
               </div>
-              <p className="text-sm text-gray-600">Review the AI-generated assessment and supporting evidence before making your decision.</p>
+              <p className="text-sm text-gray-500 mt-2">Review the AI-generated assessment and supporting evidence before making your decision.</p>
             </div>
 
-            <div className="space-y-4 mb-6">
-              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                <div className="text-sm font-medium text-gray-700 mb-3">AI Assessment</div>
+            <div className="space-y-5 mb-6">
+              <div className="p-6 bg-purple-50/90 border border-purple-100 rounded-xl">
+                <div className="text-sm font-medium text-gray-700 mb-4">AI Assessment</div>
                 <RiskBadge tier={aiRecommendation.riskTier} size="lg" />
               </div>
 
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="p-6 bg-gray-50/80 rounded-xl border border-gray-100">
                 <div className="text-sm font-medium text-gray-700 mb-3">Clinical Reasoning</div>
                 <ul className="space-y-2">
                   {aiRecommendation.reasoning.map((reason: string, idx: number) => (
                     <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
                       <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                      {reason}
+                      <MarkdownText className="flex-1">{reason}</MarkdownText>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="p-6 bg-blue-50/90 border border-blue-100 rounded-xl">
                 <div className="text-sm text-blue-900">
-                  <div className="font-medium mb-1">AI model: ClinicalAI v3.2.1</div>
-                  <div className="text-blue-800">Analysis timestamp: {new Date().toLocaleString()}</div>
+                  <div className="font-medium mb-2">AI model: ClinicalAI v3.2.1</div>
+                  <div className="text-blue-800/90">Analysis timestamp: {new Date().toLocaleString()}</div>
                   {aiRecommendation?.confidence && (
-                    <div className="text-blue-800 mt-1">Confidence: {aiRecommendation.confidence}</div>
+                    <div className="text-blue-800/90 mt-1">Confidence: {aiRecommendation.confidence}</div>
                   )}
                 </div>
               </div>
             </div>
 
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-5 p-5 bg-red-50 border border-red-200 rounded-xl">
                 <div className="text-sm text-red-900">
                   <div className="font-medium mb-1">Error</div>
                   <div className="text-red-800">{error}</div>
@@ -1294,7 +1425,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
             <button
               onClick={handleReviewAI}
               disabled={loadingAI}
-              className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md shadow-blue-600/20"
             >
               {loadingAI ? (
                 <>
@@ -1311,44 +1442,53 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
           </div>
         )}
 
-        {/* Step 3: Doctor Clinical Decision */}
+        {/* Clinical Decision */}
         {currentStep === 3 && (
-          <div>
-            <div className="mb-6 pb-4 border-b border-gray-200">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <User className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">Step 3: Clinical Decision</h3>
-                  <p className="text-sm text-gray-600 mt-1">Record your clinical judgment and reasoning. This becomes the authoritative visit record.</p>
-                </div>
-              </div>
+          <div className="p-6 md:p-8">
+            <div className="mb-8 pb-5 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Clinical Decision</h3>
+              <p className="text-sm text-gray-500 mt-2">Record your clinical judgment and reasoning. This becomes the authoritative visit record.</p>
             </div>
 
             <div className="space-y-8">
               {/* AI Proposed Plan */}
-              <div className="border-2 border-purple-200 rounded-xl p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 shadow-sm">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-purple-200 rounded-lg">
-                    <Brain className="w-5 h-5 text-purple-700" />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-gray-900">AI Recommendations</h4>
-                    <p className="text-xs text-gray-600 mt-0.5">Review and adjust based on your clinical judgment</p>
-                  </div>
+              <div className="p-6 md:p-7 bg-purple-50/90 border border-purple-100 rounded-xl">
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700">AI Recommendations</h4>
+                  <p className="text-xs text-gray-500 mt-1.5">Review and adjust based on your clinical judgment</p>
                 </div>
-                <div className="mt-4 p-3 bg-white/70 border border-purple-200 rounded-lg">
+                <div className="mt-5 p-4 bg-white/70 border border-purple-200 rounded-lg">
                   <p className="text-xs text-purple-800 font-medium flex items-center gap-2">
-                    <AlertCircle className="w-3.5 h-3.5" />
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                     <span>These recommendations are assistive; clinician review is required.</span>
                   </p>
                 </div>
 
-                {/* Differential Diagnosis */}
+                {/* Key Findings - At the top of AI Recommendations */}
+                {aiRecommendation?.reasoningReferences && aiRecommendation.reasoningReferences.length > 0 && (
+                  <div className="mb-5 mt-8">
+                    <div className="p-6 bg-gray-50/80 border border-gray-100 rounded-xl">
+                      <div className="text-sm font-medium text-gray-700 mb-3">Key Findings</div>
+                      <p className="text-xs text-gray-600 mb-4">Hover over findings to see source details. Click to open the referenced data.</p>
+                      <div className="flex flex-wrap gap-3">
+                        {aiRecommendation.reasoningReferences.map((ref: any, idx: number) => (
+                          <span 
+                            key={idx}
+                            className="px-3 py-2 bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg border border-purple-200 cursor-help hover:bg-purple-200 transition-colors shadow-sm" 
+                            title={`Source: ${ref.source || ref.type || 'Unknown'} • Type: ${ref.type || 'Unknown'}`}
+                          >
+                            {ref.label || ref.type || 'Evidence'}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Differential Diagnosis — sorted by priority (High → Medium → Low) */}
                 {aiRecommendation?.differentialDiagnosis && aiRecommendation.differentialDiagnosis.length > 0 && (
                   <div className="mb-6 mt-6">
-                    <div className="flex items-center gap-3 mb-6">
+                    <div className="flex items-center gap-3 mb-5">
                       <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-300 to-transparent"></div>
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
@@ -1357,8 +1497,18 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                       </div>
                       <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-300 to-transparent"></div>
                     </div>
-                    <div className="grid grid-cols-1 gap-5">
-                      {aiRecommendation.differentialDiagnosis.map((diagnosis, idx) => {
+                    <div className="grid grid-cols-1 gap-4">
+                      {[...aiRecommendation.differentialDiagnosis]
+                        .sort((a, b) => {
+                          const order = (d: any) => {
+                            const bin = (d.probabilityBin ?? d.probability_bin ?? '').toString().toLowerCase();
+                            if (bin === 'high') return 0;
+                            if (bin === 'medium') return 1;
+                            return 2; // low or unknown
+                          };
+                          return order(a) - order(b);
+                        })
+                        .map((diagnosis, idx) => {
                         // Handle both camelCase and snake_case from API
                         const diagnosisName = diagnosis.diagnosisName || (diagnosis as any).diagnosis_name || 'Diagnosis';
                         const diagnosisCode = (diagnosis as any).diagnosis_code || '';
@@ -1367,24 +1517,29 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                         const confidenceScore = (diagnosis as any).confidence_score || diagnosis.confidenceScore;
                         const reasoning = diagnosis.reasoning || '';
                         const supportingEvidence = diagnosis.supportingEvidence || (diagnosis as any).supporting_evidence || [];
+                        const clinicalEvidenceSummary = (diagnosis as any).rag_results || (diagnosis as any).ragResults || '';
+                        const SUMMARY_PREVIEW_LENGTH = 640;
+                        const summaryPreview = clinicalEvidenceSummary.length > SUMMARY_PREVIEW_LENGTH
+                          ? clinicalEvidenceSummary.slice(0, SUMMARY_PREVIEW_LENGTH).trim() + '…'
+                          : clinicalEvidenceSummary;
                         
                         const isExpanded = expandedDiagnosis.has(idx);
                         return (
-                        <div key={idx} className="bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50/30">
+                        <div key={idx} className="bg-white border-2 border-gray-200 rounded-xl shadow-md hover:shadow-lg hover:border-purple-300 transition-all duration-200">
                           {/* Diagnosis Name Header - Clickable */}
                           <button
                             onClick={() => toggleDiagnosis(idx)}
-                            className="w-full flex items-start justify-between p-7 pb-5 border-b-2 border-gray-100 hover:bg-gray-50 transition-colors"
+                            className="w-full flex items-start justify-between p-5 hover:bg-gray-50/50 transition-colors rounded-t-xl"
                           >
                             <div className="flex-1 pr-4 text-left">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-2 h-2 rounded-full ${
+                              <div className="flex items-start gap-3">
+                                <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${
                                   probabilityBin === 'High' ? 'bg-red-500' :
                                   probabilityBin === 'Medium' ? 'bg-yellow-500' :
                                   'bg-blue-500'
                                 }`}></div>
-                                <div className="flex-1">
-                                  <h6 className="text-xl font-bold text-black leading-tight">
+                                <div className="flex-1 min-w-0">
+                                  <h6 className="text-lg font-bold text-gray-900 leading-tight mb-1">
                                     {diagnosisName}
                                   </h6>
                                   {standardDiagnosisName && (
@@ -1393,71 +1548,104 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                     </div>
                                   )}
                                   {diagnosisCode && (
-                                    <div className="text-xs text-gray-500 mt-1 font-mono">
-                                      Code: {diagnosisCode}
+                                    <div className="text-xs text-gray-500 mt-1.5 font-mono">
+                                      Standard Diagnosis Code: {diagnosisCode}
                                     </div>
                                   )}
                                 </div>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
+                            <div className="flex flex-col items-end gap-2 flex-shrink-0 ml-3">
                               <div className="flex items-center gap-2">
-                                <span className={`px-5 py-2.5 text-xs font-bold rounded-full whitespace-nowrap shadow-md ${
-                                  probabilityBin === 'High' ? 'bg-gradient-to-r from-red-500 to-red-600 text-white' :
-                                  probabilityBin === 'Medium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white' :
-                                  'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                                <span className={`px-3 py-1.5 text-xs font-bold rounded-lg whitespace-nowrap shadow-sm ${
+                                  probabilityBin === 'High' ? 'bg-red-100 text-red-800 border border-red-300' :
+                                  probabilityBin === 'Medium' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
+                                  'bg-blue-100 text-blue-800 border border-blue-300'
                                 }`}>
                                   {probabilityBin === 'High' ? 'High Confidence' :
                                    probabilityBin === 'Medium' ? 'Moderate Confidence' :
                                    'Low Confidence'}
                                 </span>
                                 {isExpanded ? (
-                                  <ChevronUp className="w-5 h-5 text-gray-500" />
+                                  <ChevronUp className="w-4 h-4 text-gray-500 flex-shrink-0" />
                                 ) : (
-                                  <ChevronDown className="w-5 h-5 text-gray-500" />
+                                  <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
                                 )}
                               </div>
                               {confidenceScore !== undefined && confidenceScore !== null && (
                                 <span className="text-xs text-gray-600 font-semibold">
-                                  Score: {(typeof confidenceScore === 'number' ? (confidenceScore * 100).toFixed(0) : confidenceScore)}%
+                                  {(typeof confidenceScore === 'number' ? (confidenceScore * 100).toFixed(0) : confidenceScore)}%
                                 </span>
                               )}
                             </div>
                           </button>
-                          
-                          {/* Expandable Content */}
+
+                          {/* Expandable Content — Clinical Reasoning, Supporting Evidence, Evidence-Based Summary (rag_results) */}
                           {isExpanded && (
-                            <div className="px-7 pb-7">
-                              {/* Clinical Reasoning */}
+                            <div className="px-5 pb-5 border-t border-gray-100">
+                              {/* Clinical Reasoning — support [1], [2] citations when diagnosis has references */}
                               {reasoning && (
-                                <div className="mb-6">
-                                  <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-1 h-1 bg-purple-600 rounded-full"></div>
+                                <div className="mt-5 mb-5">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1.5 h-1.5 bg-purple-600 rounded-full"></div>
                                     <div className="text-xs font-bold text-purple-700 uppercase tracking-wider">Clinical Reasoning</div>
                                   </div>
-                                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-100 shadow-sm">
-                                    <p className="text-sm text-gray-800 leading-relaxed">
-                                      {reasoning}
-                                    </p>
+                                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-100">
+                                    <div className="text-sm text-gray-800 leading-relaxed">
+                                      {((diagnosis as any).references?.length > 0)
+                                        ? <RagResultsWithCitations text={reasoning} references={(diagnosis as any).references} className="leading-relaxed" compact />
+                                        : <MarkdownText>{reasoning}</MarkdownText>}
+                                    </div>
                                   </div>
                                 </div>
                               )}
                               
                               {/* Supporting Evidence */}
                               {supportingEvidence && supportingEvidence.length > 0 && (
-                                <div className="pt-5 border-t border-gray-100">
-                                  <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-1 h-1 bg-indigo-600 rounded-full"></div>
+                                <div className="pt-4 border-t border-gray-100">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></div>
                                     <div className="text-xs font-bold text-indigo-700 uppercase tracking-wider">Supporting Evidence</div>
                                   </div>
                                   <ul className="space-y-2">
                                     {supportingEvidence.map((evidence: string, evIdx: number) => (
-                                      <li key={evIdx} className="flex items-start gap-2 text-sm text-gray-700">
-                                        <span className="text-indigo-600 font-bold mt-0.5">•</span>
-                                        <span className="flex-1">{evidence}</span>
+                                      <li key={evIdx} className="flex items-start gap-2.5 text-sm text-gray-700">
+                                        <span className="text-indigo-600 font-bold mt-0.5 flex-shrink-0">•</span>
+                                        <div className="flex-1 leading-relaxed min-w-0">
+                                          <MarkdownText>{evidence}</MarkdownText>
+                                        </div>
                                       </li>
                                     ))}
                                   </ul>
+                                </div>
+                              )}
+
+                              {/* Evidence-Based Summary (rag_results) — only in expanded mode */}
+                              {clinicalEvidenceSummary && (
+                                <div className="pt-4 mt-4 border-t border-gray-100">
+                                  <div className="flex items-center gap-2 mb-3 min-w-0">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 shadow-sm" />
+                                    <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider min-w-0 break-words">Evidence-Based Summary</div>
+                                  </div>
+                                  <div className="rounded-xl p-4 bg-gradient-to-br from-emerald-50/90 to-teal-50/70 border border-emerald-100/80 shadow-sm">
+                                    <div className="text-sm text-gray-700 leading-relaxed">
+                                      <RagResultsWithCitations text={summaryPreview} references={(diagnosis as any).references} className="leading-relaxed" compact />
+                                    </div>
+                                    {clinicalEvidenceSummary.length > SUMMARY_PREVIEW_LENGTH && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const refs = (diagnosis as any).references ?? [];
+                                          setEvidenceSummaryModal({ title: `${(diagnosisName || '').replace(/\*\*/g, '').trim()} — Evidence-Based Summary`, content: clinicalEvidenceSummary, references: refs });
+                                        }}
+                                        className="mt-3 inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-emerald-700 bg-emerald-100/90 hover:bg-emerald-200/90 border border-emerald-200/80 rounded-xl transition-colors shadow-sm hover:shadow"
+                                      >
+                                        <FileText className="w-4 h-4" />
+                                        View full summary
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -1470,7 +1658,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                 )}
 
                 {/* Medications */}
-                <div className="mb-6 mt-6">
+                <div className="mb-6 mt-4">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
                     <h5 className="text-sm font-bold text-gray-900 px-3">Medications</h5>
@@ -1483,107 +1671,11 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                   {medications.length === 0 ? (
                     <div className="p-6 bg-white/80 border-2 border-dashed border-gray-300 rounded-xl text-center">
                       <div className="text-sm text-gray-500 mb-1">No medication recommendations from AI</div>
-                      <div className="text-xs text-gray-400">You can add your own recommendations below</div>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {medications.map((med) => (
-                      <div key={med.id} className={`bg-white border-2 rounded-xl p-5 shadow-md mr-4 transition-all duration-200 ${editingMedicationId === med.id ? 'border-blue-500 bg-blue-50/50 shadow-lg ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'}`}>
-                        {editingMedicationId === med.id ? (
-                          /* Edit Mode */
-                          <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="text-xs font-semibold text-gray-700 block mb-1.5">Medication</label>
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                  value={medEditForm.medication || ''}
-                                  onChange={(e) => setMedEditForm({...medEditForm, medication: e.target.value})}
-                                />
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold text-gray-700 block mb-1.5">Dose</label>
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                  value={medEditForm.dose || ''}
-                                  onChange={(e) => setMedEditForm({...medEditForm, dose: e.target.value})}
-                                />
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold text-gray-700 block mb-1.5">Frequency</label>
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                  value={medEditForm.frequency || ''}
-                                  onChange={(e) => setMedEditForm({...medEditForm, frequency: e.target.value})}
-                                />
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold text-gray-700 block mb-1.5">Duration <span className="text-gray-400 font-normal">(optional)</span></label>
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                  value={medEditForm.duration || ''}
-                                  onChange={(e) => setMedEditForm({...medEditForm, duration: e.target.value})}
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Rationale</label>
-                              <textarea
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                rows={3}
-                                value={medEditForm.rationale || ''}
-                                onChange={(e) => setMedEditForm({...medEditForm, rationale: e.target.value})}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Status</label>
-                              <select
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors bg-white"
-                                value={medEditForm.status || 'Planned'}
-                                onChange={(e) => setMedEditForm({...medEditForm, status: e.target.value})}
-                              >
-                                <option value="Planned">Planned</option>
-                                <option value="Continue">Continue</option>
-                                <option value="Start">Start</option>
-                                <option value="Increase">Increase</option>
-                                <option value="Adjust">Adjust</option>
-                                <option value="Stop">Stop</option>
-                                <option value="Discontinue">Discontinue</option>
-                                <option value="Consider">Consider</option>
-                              </select>
-                            </div>
-                            <div className="pt-3 border-t border-gray-200">
-                              <div className="text-xs font-semibold text-gray-600 mb-2">Evidence (read-only)</div>
-                              <div className="flex flex-wrap gap-2">
-                                {med.evidence.map((ev, idx) => (
-                                  <span key={idx} className="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-md border border-purple-200 shadow-sm">
-                                    {ev}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
-                              <button
-                                onClick={handleSaveMedication}
-                                className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg transition-all duration-200"
-                              >
-                                Save Changes
-                              </button>
-                              <button
-                                onClick={handleCancelMedicationEdit}
-                                className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 transition-all duration-200"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          /* Read Mode */
-                          <>
+                      <div key={med.id} className="bg-white border-2 rounded-xl p-5 shadow-md mr-4 transition-all duration-200 border-gray-200 hover:border-gray-300 hover:shadow-lg">
                             <button
                               onClick={() => toggleMedication(med.id)}
                               className="w-full flex items-start justify-between mb-3 hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
@@ -1597,7 +1689,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                     <>
                                       <span className="text-gray-400">•</span>
                                       <div className="text-xs text-gray-500 font-mono">
-                                        Code: {(med as any).medicationCode}
+                                        RxNorm Code: {(med as any).medicationCode}
                                       </div>
                                     </>
                                   )}
@@ -1688,127 +1780,90 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                 </div>
                               </div>
                             )}
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleEditMedication(med)}
-                                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                                title="Edit recommendation"
-                              >
-                                <Edit className="w-3 h-3" />
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteMedication(med.id)}
-                                className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1"
-                                title="Remove from proposed plan"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                Remove
-                              </button>
-                            </div>
-                          </>
-                        )}
                       </div>
                       ))}
                     </div>
                   )}
+                </div>
 
-                    {/* Add New Medication Form */}
-                    {addingMedication && (
-                      <div className="bg-white border-2 border-blue-400 rounded-xl p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-lg">
-                        <div className="text-sm text-blue-900 mb-4 font-bold flex items-center gap-2">
-                          <Plus className="w-4 h-4" />
-                          Add New Medication Recommendation
-                        </div>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Medication <span className="text-red-500">*</span></label>
-                              <input
-                                type="text"
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                value={medEditForm.medication || ''}
-                                onChange={(e) => setMedEditForm({...medEditForm, medication: e.target.value})}
-                                placeholder="e.g., Metoprolol"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Dose <span className="text-red-500">*</span></label>
-                              <input
-                                type="text"
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                value={medEditForm.dose || ''}
-                                onChange={(e) => setMedEditForm({...medEditForm, dose: e.target.value})}
-                                placeholder="e.g., 25 mg"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Frequency <span className="text-red-500">*</span></label>
-                              <input
-                                type="text"
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                value={medEditForm.frequency || ''}
-                                onChange={(e) => setMedEditForm({...medEditForm, frequency: e.target.value})}
-                                placeholder="e.g., twice daily"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Duration <span className="text-gray-400 font-normal">(optional)</span></label>
-                              <input
-                                type="text"
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                value={medEditForm.duration || ''}
-                                onChange={(e) => setMedEditForm({...medEditForm, duration: e.target.value})}
-                                placeholder="e.g., Ongoing"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-xs font-semibold text-gray-700 block mb-1.5">Rationale <span className="text-red-500">*</span></label>
-                            <textarea
-                              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                              rows={3}
-                              value={medEditForm.rationale || ''}
-                              onChange={(e) => setMedEditForm({...medEditForm, rationale: e.target.value})}
-                              placeholder="Clinical justification for this recommendation"
-                            />
-                          </div>
-                          <div className="flex gap-3 pt-3 border-t border-gray-200">
-                            <button
-                              onClick={handleSaveNewMedication}
-                              disabled={!medEditForm.medication || !medEditForm.dose || !medEditForm.frequency || !medEditForm.rationale}
-                              className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all duration-200"
-                            >
-                              Add Recommendation
-                            </button>
-                            <button
-                              onClick={handleCancelAddMedication}
-                              className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 transition-all duration-200"
-                            >
-                              Cancel
-                            </button>
-                          </div>
+                {/* Drug Interactions — among recommended medications only */}
+                {medications.length > 0 && (
+                  <div className="mt-6">
+                    <div className="rounded-xl border-2 border-amber-200/80 bg-gradient-to-br from-amber-50/90 to-orange-50/70 shadow-sm overflow-hidden">
+                      <div className="flex items-center gap-2 px-5 py-4 border-b border-amber-200/60">
+                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                        <div>
+                          <h5 className="text-sm font-bold text-amber-900">Drug Interactions</h5>
+                          <p className="text-xs text-amber-800/90 mt-0.5">
+                            Interactions among the {medications.length} recommended medication{medications.length !== 1 ? 's' : ''}
+                          </p>
                         </div>
                       </div>
-                    )}
+                      <div className="p-5">
+                        {drugInteractionsSection === 'loading' && (
+                          <div className="flex items-center justify-center gap-3 py-8 text-amber-800">
+                            <span className="inline-block w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" aria-hidden />
+                            <span className="text-sm font-medium">Checking interactions…</span>
+                          </div>
+                        )}
+                        {drugInteractionsSection === 'idle' && null}
+                        {drugInteractionsSection && typeof drugInteractionsSection === 'object' && 'error' in drugInteractionsSection && (
+                          <p className="text-sm text-amber-800/80 py-2">Unable to load interaction data.</p>
+                        )}
+                        {drugInteractionsSection && typeof drugInteractionsSection === 'object' && 'pairs' in drugInteractionsSection && (() => {
+                          const { pairs } = drugInteractionsSection;
+                          if (pairs.length === 0) {
+                            return (
+                              <p className="text-sm text-amber-900/90 py-2">
+                                No interactions found among the {medications.length} recommended medication{medications.length !== 1 ? 's' : ''}.
+                              </p>
+                            );
+                          }
+                          return (
+                            <div className="space-y-3">
+                              {pairs.map((p, idx) => (
+                                <div
+                                  key={idx}
+                                  className="rounded-lg border border-amber-200 bg-white/90 p-4 shadow-sm"
+                                >
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="inline-flex items-center px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-amber-100 text-amber-900 border border-amber-200">
+                                      {p.drugA}
+                                    </span>
+                                    <span className="text-amber-600 font-medium">↔</span>
+                                    <span className="inline-flex items-center px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-amber-100 text-amber-900 border border-amber-200">
+                                      {p.drugB}
+                                    </span>
+                                  </div>
+                                  {p.interactionTexts.length > 0 && (
+                                    <ul className="mt-3 space-y-1.5 text-xs text-gray-700 pl-1">
+                                      {p.interactionTexts.slice(0, 3).map((text, i) => (
+                                        <li key={i} className="flex gap-2">
+                                          <span className="text-amber-500 mt-0.5">•</span>
+                                          <span className="flex-1 leading-relaxed">{text.length > 220 ? text.slice(0, 220).trim() + '…' : text}</span>
+                                        </li>
+                                      ))}
+                                      {p.interactionTexts.length > 3 && (
+                                        <li className="text-amber-700 font-medium">+{p.interactionTexts.length - 3} more</li>
+                                      )}
+                                    </ul>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
                   </div>
-                  {!addingMedication && (
-                    <button
-                      onClick={handleAddMedication}
-                      className="mt-3 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add medication recommendation
-                    </button>
-                  )}
-                </div>
+                )}
 
                 {/* Procedures/Orders */}
                 <div className="mt-6 mb-8">
                   <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100/50 border-2 border-gray-200 rounded-xl shadow-sm">
                     <div className="flex items-center gap-2 mb-4">
                       <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-                      <h5 className="text-sm font-bold text-gray-900 px-3">Procedures / Orders</h5>
+                      <h5 className="text-sm font-bold text-gray-900 px-3">Procedures</h5>
                       <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
                     </div>
                     <p className="text-xs text-gray-500 mb-4 flex items-center gap-1.5 justify-center">
@@ -1818,90 +1873,11 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                     {procedures.length === 0 ? (
                       <div className="p-6 bg-white/80 border-2 border-dashed border-gray-300 rounded-xl text-center">
                         <div className="text-sm text-gray-500 mb-1">No procedure recommendations from AI</div>
-                        <div className="text-xs text-gray-400">You can add your own recommendations below</div>
                       </div>
                     ) : (
                     <div className="space-y-4">
                       {procedures.map((proc) => (
-                      <div key={proc.id} className={`bg-white border-2 rounded-xl p-5 shadow-md mr-4 transition-all duration-200 ${editingProcedureId === proc.id ? 'border-blue-500 bg-blue-50/50 shadow-lg ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'}`}>
-                        {editingProcedureId === proc.id ? (
-                          /* Edit Mode */
-                          <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="text-xs font-semibold text-gray-700 block mb-1.5">Procedure / Order</label>
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                  value={procEditForm.procedure || ''}
-                                  onChange={(e) => setProcEditForm({...procEditForm, procedure: e.target.value})}
-                                />
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold text-gray-700 block mb-1.5">Timing</label>
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                  value={procEditForm.timing || ''}
-                                  onChange={(e) => setProcEditForm({...procEditForm, timing: e.target.value})}
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Rationale</label>
-                              <textarea
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                rows={3}
-                                value={procEditForm.rationale || ''}
-                                onChange={(e) => setProcEditForm({...procEditForm, rationale: e.target.value})}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Status</label>
-                              <select
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors bg-white"
-                                value={procEditForm.status || 'Planned'}
-                                onChange={(e) => setProcEditForm({...procEditForm, status: e.target.value})}
-                              >
-                                <option value="Planned">Planned</option>
-                                <option value="Order">Order</option>
-                                <option value="Schedule">Schedule</option>
-                                <option value="Urgent">Urgent</option>
-                                <option value="ASAP">ASAP</option>
-                                <option value="Critical">Critical</option>
-                                <option value="Consider">Consider</option>
-                                <option value="Defer">Defer</option>
-                                <option value="Not planned">Not planned</option>
-                              </select>
-                            </div>
-                            <div className="pt-3 border-t border-gray-200">
-                              <div className="text-xs font-semibold text-gray-600 mb-2">Evidence (read-only)</div>
-                              <div className="flex flex-wrap gap-2">
-                                {proc.evidence.map((ev, idx) => (
-                                  <span key={idx} className="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-md border border-purple-200 shadow-sm">
-                                    {ev}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="flex gap-3 pt-4 border-t border-gray-200">
-                              <button
-                                onClick={handleSaveProcedure}
-                                className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg transition-all duration-200"
-                              >
-                                Save Changes
-                              </button>
-                              <button
-                                onClick={handleCancelProcedureEdit}
-                                className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 transition-all duration-200"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          /* Read Mode */
-                          <>
+                      <div key={proc.id} className="bg-white border-2 rounded-xl p-5 shadow-md mr-4 transition-all duration-200 border-gray-200 hover:border-gray-300 hover:shadow-lg">
                             <button
                               onClick={() => toggleProcedure(proc.id)}
                               className="w-full flex items-start justify-between mb-3 hover:bg-gray-50 p-2 -m-2 rounded transition-colors"
@@ -1911,6 +1887,14 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                   <div className="font-bold text-base text-gray-900">
                                     {proc.procedure}
                                   </div>
+                                  {proc.cptCode && (
+                                    <>
+                                      <span className="text-gray-400">•</span>
+                                      <div className="text-xs text-gray-500 font-mono">
+                                        Procedure Code (CPT): {proc.cptCode}
+                                      </div>
+                                    </>
+                                  )}
                                   <span className="text-gray-400">•</span>
                                   <div className="text-sm text-gray-700 font-medium">
                                     {proc.timing}
@@ -1968,158 +1952,24 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                 </div>
                               </div>
                             )}
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleEditProcedure(proc)}
-                                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                                title="Edit recommendation"
-                              >
-                                <Edit className="w-3 h-3" />
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteProcedure(proc.id)}
-                                className="text-xs text-red-600 hover:text-red-700 flex items-center gap-1"
-                                title="Remove from proposed plan"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                Remove
-                              </button>
-                            </div>
-                          </>
-                        )}
                       </div>
                       ))}
                     </div>
                   )}
-
-                    {/* Add New Procedure Form */}
-                    {addingProcedure && (
-                      <div className="bg-white border-2 border-blue-400 rounded-xl p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 shadow-lg">
-                        <div className="text-sm text-blue-900 mb-4 font-bold flex items-center gap-2">
-                          <Plus className="w-4 h-4" />
-                          Add New Procedure / Order
-                        </div>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Procedure / Order <span className="text-red-500">*</span></label>
-                              <input
-                                type="text"
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                value={procEditForm.procedure || ''}
-                                onChange={(e) => setProcEditForm({...procEditForm, procedure: e.target.value})}
-                                placeholder="e.g., Order ECG"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-gray-700 block mb-1.5">Timing <span className="text-red-500">*</span></label>
-                              <input
-                                type="text"
-                                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                value={procEditForm.timing || ''}
-                                onChange={(e) => setProcEditForm({...procEditForm, timing: e.target.value})}
-                                placeholder="e.g., In 7 days"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-xs font-semibold text-gray-700 block mb-1.5">Rationale <span className="text-red-500">*</span></label>
-                            <textarea
-                              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                              rows={3}
-                              value={procEditForm.rationale || ''}
-                              onChange={(e) => setProcEditForm({...procEditForm, rationale: e.target.value})}
-                              placeholder="Clinical justification for this recommendation"
-                            />
-                          </div>
-                          <div className="flex gap-3 pt-3 border-t border-gray-200">
-                            <button
-                              onClick={handleSaveNewProcedure}
-                              disabled={!procEditForm.procedure || !procEditForm.timing || !procEditForm.rationale}
-                              className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all duration-200"
-                            >
-                              Add Recommendation
-                            </button>
-                            <button
-                              onClick={handleCancelAddProcedure}
-                              className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 transition-all duration-200"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {!addingProcedure && (
-                      <button
-                        onClick={handleAddProcedure}
-                        className="mt-3 text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add procedure recommendation
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Doctor Decision Panel */}
-              <div className="grid grid-cols-2 gap-6 mt-8">
-                {/* Left: AI Context */}
-                <div className="space-y-5">
-                  <div className="p-5 bg-gradient-to-br from-purple-50 to-purple-100/50 border-2 border-purple-200 rounded-xl shadow-md">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-purple-200 rounded-lg">
-                        <Brain className="w-5 h-5 text-purple-700" />
-                      </div>
-                      <span className="text-base font-bold text-purple-900">AI Assessment</span>
-                    </div>
-                    
-                    <div className="mb-5">
-                      <RiskBadge tier={aiRecommendation.riskTier} size="md" />
-                    </div>
-                    <div className="mb-4 flex items-center gap-2 p-2 bg-white/70 rounded-lg">
-                      <span className="text-xs font-semibold text-purple-700">AI Confidence:</span>
-                      <span className="text-xs px-3 py-1 bg-purple-200 text-purple-900 font-bold rounded-lg shadow-sm">High</span>
-                    </div>
-                    
-                    <div className="pt-4 border-t-2 border-purple-200 space-y-2">
-                      <div className="flex items-center gap-2 text-xs text-purple-700 font-medium">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>Analysis: {new Date().toLocaleString()}</span>
-                      </div>
-                      <div className="text-xs text-purple-600">
-                        Based on data updated 2 days ago
-                      </div>
-                    </div>
-                  </div>
+              {/* AI Context Panel */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4 items-start">
+                {/* Left: Risk Assessment */}
+                <div className="space-y-3">
 
-                  <div className="p-5 bg-white border-2 border-purple-200 rounded-xl shadow-md">
-                    <div className="text-sm font-bold text-gray-900 mb-3">Key Findings</div>
-                    <p className="text-xs text-gray-600 mb-4">Hover over findings to see source details. Click to open the referenced data.</p>
-                    {aiRecommendation.reasoningReferences && aiRecommendation.reasoningReferences.length > 0 ? (
-                      <div className="flex flex-wrap gap-2.5">
-                        {aiRecommendation.reasoningReferences.map((ref: any, idx: number) => (
-                          <span 
-                            key={idx}
-                            className="px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg border border-purple-200 cursor-help hover:bg-purple-200 transition-colors shadow-sm" 
-                            title={`Source: ${ref.source || ref.type || 'Unknown'} • Type: ${ref.type || 'Unknown'}`}
-                          >
-                            {ref.label || ref.type || 'Evidence'}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-gray-500 italic p-3 bg-gray-50 rounded-lg">No key findings available</div>
-                    )}
-                  </div>
-
-                  {aiRecommendation.riskAssessment && (
-                    <div className="p-5 bg-gradient-to-br from-amber-50 to-amber-100/50 border-2 border-amber-200 rounded-xl shadow-md">
+                  {aiRecommendation?.riskAssessment && (
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 border-2 border-amber-200 rounded-xl shadow-md overflow-hidden">
                       <button
                         onClick={() => setExpandedRiskAssessment(!expandedRiskAssessment)}
-                        className="w-full flex items-center justify-between mb-4 hover:bg-amber-100/50 p-2 -m-2 rounded transition-colors"
+                        className="w-full flex items-center justify-between px-5 py-4 hover:bg-amber-100/50 transition-colors"
                       >
                         <div className="text-sm font-bold text-amber-900">Risk Assessment</div>
                         <div className="flex items-center gap-2">
@@ -2133,22 +1983,22 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                             </span>
                           )}
                           {expandedRiskAssessment ? (
-                            <ChevronUp className="w-4 h-4 text-amber-700" />
+                            <ChevronUp className="w-4 h-4 text-amber-700 flex-shrink-0" />
                           ) : (
-                            <ChevronDown className="w-4 h-4 text-amber-700" />
+                            <ChevronDown className="w-4 h-4 text-amber-700 flex-shrink-0" />
                           )}
                         </div>
                       </button>
                       {expandedRiskAssessment && (
-                        <>
-                          {aiRecommendation.riskAssessment.risk_factors_identified && aiRecommendation.riskAssessment.risk_factors_identified.length > 0 && (
-                            <div className="mb-4">
-                              <div className="text-xs text-amber-800 font-semibold mb-2 uppercase tracking-wide">Risk Factors</div>
-                              <div className="flex flex-wrap gap-2">
+                        <div className="px-5 pb-5 pt-1 border-t border-amber-200/50">
+                          {aiRecommendation?.riskAssessment.risk_factors_identified && aiRecommendation.riskAssessment.risk_factors_identified.length > 0 && (
+                            <div className="mt-5 mb-5">
+                              <div className="text-xs text-amber-800 font-semibold mb-3 uppercase tracking-wide">Clinical Watchlist Indicators</div>
+                              <div className="flex flex-wrap gap-3">
                                 {aiRecommendation.riskAssessment.risk_factors_identified.map((factor: any, idx: number) => (
                                   <span 
                                     key={idx} 
-                                    className="inline-flex items-center px-2.5 py-1 bg-amber-100 text-amber-900 text-xs font-medium rounded-md border border-amber-300"
+                                    className="inline-flex items-center px-3 py-1.5 bg-amber-100 text-amber-900 text-xs font-medium rounded-md border border-amber-300"
                                   >
                                     {typeof factor === 'string' ? factor : factor.factor || 'Unknown risk factor'}
                                   </span>
@@ -2156,9 +2006,9 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                               </div>
                             </div>
                           )}
-                          {aiRecommendation.riskAssessment.mitigation_strategies && aiRecommendation.riskAssessment.mitigation_strategies.length > 0 && (
-                            <div>
-                              <div className="text-xs text-amber-800 font-semibold mb-2 uppercase tracking-wide">Mitigation Strategies</div>
+                          {aiRecommendation?.riskAssessment.mitigation_strategies && aiRecommendation.riskAssessment.mitigation_strategies.length > 0 && (
+                            <div className="pt-4 border-t border-amber-200/50">
+                              <div className="text-xs text-amber-800 font-semibold mb-3 uppercase tracking-wide">Mitigation Strategies</div>
                               <ul className="space-y-2 text-xs text-amber-800">
                                 {aiRecommendation.riskAssessment.mitigation_strategies.map((strategy: string, idx: number) => (
                                   <li key={idx} className="flex items-start gap-2.5">
@@ -2169,92 +2019,29 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                               </ul>
                             </div>
                           )}
-                        </>
+                        </div>
                       )}
                     </div>
                   )}
-
                 </div>
 
-                {/* Right: Doctor Input */}
-                <div className="space-y-5">
-                  <div className="p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 border-2 border-blue-200 rounded-xl shadow-md">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-blue-200 rounded-lg">
-                        <User className="w-5 h-5 text-blue-700" />
-                      </div>
-                      <span className="text-base font-bold text-blue-900">Your Decision</span>
-                    </div>
-
-                    <div className="mb-5 p-4 bg-white rounded-xl border-2 border-blue-200 shadow-sm">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="text-xs font-semibold text-gray-600 mb-2">AI Assessment</div>
-                          <RiskBadge tier={aiRecommendation.riskTier} size="sm" />
-                        </div>
-                        <div>
-                          <div className="text-xs font-semibold text-gray-600 mb-2">Your Selection</div>
-                          <RiskBadge tier={selectedRiskTier} size="sm" />
-                        </div>
-                      </div>
-                      {selectedRiskTier !== aiRecommendation.riskTier && (
-                        <div className="mt-3 p-3 bg-amber-50 border-2 border-amber-200 rounded-lg text-xs text-amber-900 font-semibold">
-                          <span className="font-bold">⚠️ Override detected:</span> Reasoning required below.
-                        </div>
+                {/* Right: Additional Recommendations */}
+                {aiRecommendation?.additionalRecommendations && aiRecommendation.additionalRecommendations.length > 0 && (
+                  <div className="bg-gradient-to-br from-blue-50 via-blue-100/70 to-blue-50 border-2 border-blue-200 rounded-xl shadow-sm overflow-hidden">
+                    <button
+                      onClick={() => setExpandedAdditionalRecs(!expandedAdditionalRecs)}
+                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-blue-100/50 transition-colors"
+                    >
+                      <div className="text-sm font-bold text-blue-900">Additional Recommendations</div>
+                      {expandedAdditionalRecs ? (
+                        <ChevronUp className="w-4 h-4 text-blue-700 flex-shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-blue-700 flex-shrink-0" />
                       )}
-                    </div>
-                    
-                    <div className="mb-4">
-                      <label className="text-xs font-bold text-gray-700 mb-2 block">Final Risk Tier</label>
-                      <select 
-                        className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-sm font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors bg-white"
-                        value={selectedRiskTier}
-                        onChange={(e) => setSelectedRiskTier(e.target.value as 'Low' | 'Medium' | 'High')}
-                      >
-                        <option value="Low">Low Alert</option>
-                        <option value="Medium">Moderate Alert</option>
-                        <option value="High">High Alert</option>
-                        <option value="Critical">Critical Alert</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="text-xs font-bold text-gray-700 mb-2 block">Reasoning Notes</label>
-                      <p className="text-xs text-gray-600 mb-3 leading-relaxed">Summarize your clinical reasoning for this decision and any modifications to the proposed plan.</p>
-                      <textarea 
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" 
-                        rows={5}
-                        value={reasoningNotes}
-                        onChange={(e) => setReasoningNotes(e.target.value)}
-                        placeholder="Document your reasoning and any plan modifications..."
-                      ></textarea>
-                      <div className="text-xs text-gray-500 mt-2">
-                        {selectedRiskTier !== aiRecommendation.riskTier && (
-                          <span className="text-amber-600 font-bold flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            If your final risk tier differs from the AI assessment, document the rationale here.
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Additional Recommendations */}
-                  {aiRecommendation.additionalRecommendations && aiRecommendation.additionalRecommendations.length > 0 && (
-                    <div className="p-3 bg-gradient-to-br from-blue-50 via-blue-100/70 to-blue-50 border-2 border-blue-200 rounded-lg shadow-sm">
-                      <button
-                        onClick={() => setExpandedAdditionalRecs(!expandedAdditionalRecs)}
-                        className="w-full flex items-center justify-between mb-2 hover:bg-blue-100/50 p-2 -m-2 rounded transition-colors"
-                      >
-                        <div className="text-sm font-bold text-blue-900">Additional Recommendations</div>
-                        {expandedAdditionalRecs ? (
-                          <ChevronUp className="w-4 h-4 text-blue-700" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-blue-700" />
-                        )}
-                      </button>
-                      {expandedAdditionalRecs && (
-                        <div className="space-y-1.5">
+                    </button>
+                    {expandedAdditionalRecs && (
+                      <div className="px-5 pb-5 pt-1 border-t border-blue-200/50">
+                        <div className="mt-5 space-y-3">
                           {aiRecommendation.additionalRecommendations.map((rec: string, idx: number) => {
                             // Parse category if present (format: "Category: Recommendation text")
                             const parts = rec.split(':');
@@ -2262,7 +2049,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                             const recommendation = parts.length > 1 ? parts.slice(1).join(':').trim() : rec;
                             
                             return (
-                              <div key={idx} className="flex items-start gap-2 bg-white rounded-md p-2 border border-blue-200/60">
+                              <div key={idx} className="flex items-start gap-3 bg-white rounded-md p-3 border border-blue-200/60">
                                 <div className="w-2 h-2 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
                                 <div className="flex-1">
                                   {category && (
@@ -2270,47 +2057,72 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                                       {category}:
                                     </span>
                                   )}
-                                  <span className="text-xs text-gray-900 leading-snug">{recommendation}</span>
+                                  <span className="text-xs text-gray-900 leading-relaxed">{recommendation}</span>
                                 </div>
                               </div>
                             );
                           })}
                         </div>
-                      )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Your Decision Section - Moved Above Checklist */}
+              <div className="mt-8">
+                <div className="p-6 md:p-7 bg-gradient-to-br from-blue-50 to-blue-100/50 border-2 border-blue-200 rounded-xl shadow-md">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-2.5 bg-blue-200 rounded-lg">
+                      <User className="w-5 h-5 text-blue-700" />
                     </div>
-                  )}
+                    <span className="text-sm font-bold text-blue-900">Your Decision</span>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 mb-2 block">Reasoning Notes</label>
+                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">Summarize your clinical reasoning for this decision and any modifications to the proposed plan.</p>
+                    <textarea 
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors" 
+                      rows={4}
+                      value={reasoningNotes}
+                      onChange={(e) => setReasoningNotes(e.target.value)}
+                      placeholder="Document your reasoning and any plan modifications..."
+                    ></textarea>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 border-2 border-blue-200 rounded-xl mb-6 mt-8 shadow-md">
+              {/* Final Review Checklist */}
+              <div className="p-6 md:p-7 bg-gradient-to-br from-blue-50 to-blue-100/50 border-2 border-blue-200 rounded-xl mb-6 mt-6 shadow-md">
                 <div className="text-sm font-bold text-blue-900 mb-4">Final Review Checklist</div>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-blue-800 font-medium">
-                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3 text-xs text-blue-800 font-medium py-1">
+                    <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
                     <span>AI assessment reviewed</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-blue-800 font-medium">
-                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <div className="flex items-center gap-3 text-xs text-blue-800 font-medium py-1">
+                    <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
                     <span>Evidence reviewed</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-blue-800 font-medium">
-                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    <span>Proposed plan reviewed and adjusted</span>
+                  <div className="flex items-center gap-3 text-xs text-blue-800 font-medium py-1">
+                    <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                    <span>Proposed plan reviewed</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-blue-800 font-medium">
-                    {reasoningNotes.trim().length > 0 || selectedRiskTier === aiRecommendation.riskTier ? (
-                      <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <div className="flex items-center gap-3 text-xs text-blue-800 font-medium py-1">
+                    {reasoningNotes.trim().length > 0 ? (
+                      <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
                     ) : (
-                      <Circle className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />
                     )}
-                    <span>Reasoning notes completed {selectedRiskTier !== aiRecommendation.riskTier && <span className="text-amber-600 font-bold">(required for override)</span>}</span>
+                    <span>Reasoning notes completed</span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 mt-6">
                 {error && (
-                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="mb-5 p-5 bg-red-50 border border-red-200 rounded-xl">
                     <div className="text-sm text-red-900">
                       <div className="font-medium mb-1">Error</div>
                       <div className="text-red-800">{error}</div>
@@ -2319,7 +2131,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                 )}
                 <button
                   onClick={handleApproveDecision}
-                  disabled={finalizing || (selectedRiskTier !== aiRecommendation.riskTier && reasoningNotes.trim().length === 0)}
+                  disabled={finalizing}
                   className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-base rounded-xl hover:from-green-700 hover:to-green-800 active:from-green-800 active:to-green-900 transition-all duration-200 flex items-center justify-center gap-3 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl disabled:shadow-none"
                 >
                   {finalizing ? (
@@ -2334,7 +2146,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                     </>
                   )}
                 </button>
-                <div className="text-xs text-center text-gray-600 font-medium">
+                <div className="text-xs text-center text-gray-600 font-medium mt-3">
                   This will finalize the clinical decision for this visit and update the patient record.
                 </div>
                 
@@ -2346,50 +2158,45 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                 </button> */}
               </div>
             </div>
+          </div>
         )}
 
-        {/* Step 4: Completed */}
+        {/* Completed */}
         {currentStep === 4 && (
-          <div className="py-12">
-            {/* Success Header */}
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-full mb-6 shadow-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-bold text-green-700 uppercase tracking-wider">Visit Completed</span>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <div className="p-6 md:p-8">
+            <div className="mb-8 pb-5 border-b border-gray-100">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Visit Completed</h3>
+                <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                  Success
+                </span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Visit Successfully Completed
-              </h3>
-              <p className="text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm text-gray-500 mt-2">
                 Clinical decision has been finalized and saved to the patient record. Digital twin summary has been generated and stored.
               </p>
             </div>
 
             <div className="max-w-5xl mx-auto space-y-8">
               {/* Main Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column: Decision Summary */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Decision Summary Card */}
-                  <div className="bg-gradient-to-br from-white to-green-50 border-2 border-green-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-6 h-6 text-green-600" />
-                      </div>
-                      <h4 className="text-base font-bold text-gray-900">Decision Summary</h4>
+                  <div className="p-6 md:p-7 bg-green-50/90 border border-green-100 rounded-xl">
+                    <div className="mb-5">
+                      <h4 className="text-sm font-medium text-gray-700">Decision Summary</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Final Risk Tier</div>
                         <div>
                           <RiskBadge tier={doctorDecision.riskTier} size="lg" />
                         </div>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Approved By</div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <span className="text-blue-600 font-semibold text-sm">
                               {loggedInPractitioner?.name 
                                 ? loggedInPractitioner.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -2401,10 +2208,10 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                           </div>
                         </div>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Completed At</div>
                         <div className="flex items-center gap-2 text-xs text-gray-700">
-                          <Clock className="w-3 h-3 text-gray-400" />
+                          <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
                           <span>{doctorDecision?.timestamp}</span>
                         </div>
                       </div>
@@ -2413,31 +2220,26 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
 
                   {/* Twin Summary Card */}
                   {doctorDecision.twinSummary && (
-                    <div className="bg-white border-2 border-blue-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <FileText className="w-6 h-6 text-blue-600" />
-                          </div>
-                          <h4 className="text-base font-bold text-gray-900">Digital Twin Summary</h4>
-                        </div>
-                        <span className="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold rounded-full shadow-sm">
+                    <div className="p-6 md:p-7 bg-blue-50/90 border border-blue-100 rounded-xl">
+                      <div className="flex items-center justify-between mb-5">
+                        <h4 className="text-sm font-medium text-gray-700">Digital Twin Summary</h4>
+                        <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
                           ✓ Saved to Database
                         </span>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         {doctorDecision.twinSummary.summaryVersion && (
-                          <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Summary Version</div>
+                          <div className="p-4 bg-gray-50/80 rounded-xl border border-gray-100">
+                            <div className="text-xs font-medium text-gray-500 mb-2">Summary Version</div>
                             <div className="text-sm font-mono text-gray-900 break-all font-semibold">
                               {doctorDecision.twinSummary.summaryVersion}
                             </div>
                           </div>
                         )}
                         {doctorDecision.twinSummary.asOfTime && (
-                          <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">As of Time</div>
+                          <div className="p-4 bg-gray-50/80 rounded-xl border border-gray-100">
+                            <div className="text-xs font-medium text-gray-500 mb-2">As of Time</div>
                             <div className="text-sm text-gray-900 font-semibold">
                               {new Date(doctorDecision.twinSummary.asOfTime).toLocaleString('en-US', {
                                 year: 'numeric',
@@ -2452,13 +2254,8 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                       </div>
 
                       {doctorDecision.twinSummary.summaryText && (
-                        <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
-                          <div className="flex items-center gap-2 mb-3">
-                            <FileText className="w-4 h-4 text-blue-600" />
-                            <div className="text-xs font-bold text-blue-900 uppercase tracking-wider">
-                              Clinical Summary
-                            </div>
-                          </div>
+                        <div className="p-5 bg-blue-50/90 border border-blue-100 rounded-xl">
+                          <div className="text-sm font-medium text-gray-700 mb-2">Clinical Summary</div>
                           <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                             {doctorDecision.twinSummary.summaryText}
                           </div>
@@ -2470,52 +2267,49 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
 
                 {/* Right Column: Visit Outcome Summary */}
                 <div className="lg:col-span-1">
-                  <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg sticky top-6">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-6 h-6 text-purple-600" />
-                      </div>
-                      <h4 className="text-base font-bold text-gray-900">Visit Outcomes</h4>
+                  <div className="p-6 md:p-7 bg-gray-50/80 border border-gray-100 rounded-xl sticky top-6">
+                    <div className="mb-5">
+                      <h4 className="text-sm font-medium text-gray-700">Visit Outcomes</h4>
                     </div>
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3 p-3 bg-green-50 rounded-xl border border-green-200">
-                        <div className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="flex items-start gap-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <CheckCircle className="w-4 h-4 text-white" />
                         </div>
-                        <div className="flex-1">
-                          <div className="text-xs font-semibold text-gray-900 mb-1">Decision Documented</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-900 mb-1.5">Decision Documented</div>
                           <div className="text-xs text-gray-600">Clinical decision saved to record</div>
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
-                        <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <CheckCircle className="w-4 h-4 text-white" />
                         </div>
-                        <div className="flex-1">
-                          <div className="text-xs font-semibold text-gray-900 mb-1">Treatment Plan</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-900 mb-1.5">Treatment Plan</div>
                           <div className="text-xs text-blue-700 font-medium">{doctorDecision.planSummary}</div>
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3 p-3 bg-indigo-50 rounded-xl border border-indigo-200">
-                        <div className="w-7 h-7 bg-indigo-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="flex items-start gap-4 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+                        <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <FileText className="w-4 h-4 text-white" />
                         </div>
-                        <div className="flex-1">
-                          <div className="text-xs font-semibold text-gray-900 mb-1">Twin Summary</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-900 mb-1.5">Twin Summary</div>
                           <div className="text-xs text-gray-600">Generated and saved</div>
                         </div>
                       </div>
                       
-                      <div className={`flex items-start gap-3 p-3 rounded-xl border ${
+                      <div className={`flex items-start gap-4 p-4 rounded-xl border ${
                         doctorDecision.monitoringStatus === 'Active' 
                           ? 'bg-green-50 border-green-200' 
                           : doctorDecision.monitoringStatus === 'Paused'
                           ? 'bg-yellow-50 border-yellow-200'
                           : 'bg-gray-50 border-gray-200'
                       }`}>
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
                           doctorDecision.monitoringStatus === 'Active'
                             ? 'bg-green-500'
                             : doctorDecision.monitoringStatus === 'Paused'
@@ -2524,8 +2318,8 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                         }`}>
                           <CheckCircle className="w-4 h-4 text-white" />
                         </div>
-                        <div className="flex-1">
-                          <div className="text-xs font-semibold text-gray-900 mb-1">Monitoring Status</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-900 mb-1.5">Monitoring Status</div>
                           <div className={`text-xs font-medium ${
                             doctorDecision.monitoringStatus === 'Active'
                               ? 'text-green-700'
@@ -2539,12 +2333,12 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                       </div>
                       
                       {doctorDecision.followUpDate && (
-                        <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                          <div className="w-7 h-7 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="flex items-start gap-4 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                          <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                             <Clock className="w-4 h-4 text-white" />
                           </div>
-                          <div className="flex-1">
-                            <div className="text-xs font-semibold text-gray-900 mb-1">Follow-up Scheduled</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold text-gray-900 mb-1.5">Follow-up Scheduled</div>
                             <div className="text-xs text-amber-700 font-medium">{doctorDecision.followUpDate}</div>
                           </div>
                         </div>
@@ -2555,7 +2349,7 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 mt-2 border-t border-gray-100">
                 <button
                   onClick={() => {
                     setCurrentStep(1);
@@ -2565,14 +2359,14 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
                     setDoctorDecision(null);
                     setSummaryText(null);
                   }}
-                  className="px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="px-8 py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm"
                 >
                   Start New Visit
                 </button>
                 <button
                   onClick={handleDownloadVisitReport}
                   disabled={!doctorDecision}
-                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Download className="w-5 h-5" />
                   Download Visit Report
@@ -2583,26 +2377,44 @@ export function VisitAnalysisFlow({ patient, onViewFullRecord, onViewClinicalDis
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Remove recommendation?</h3>
-            <p className="text-sm text-gray-600 mb-6">
-              This recommendation will be removed from the proposed plan. This does not affect the final clinical decision unless you choose to modify it.
-            </p>
-            <div className="flex gap-3 justify-end">
+      {/* Evidence-Based Summary modal (full text) */}
+      {evidenceSummaryModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md"
+          onClick={() => setEvidenceSummaryModal(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="evidence-summary-modal-title"
+        >
+          <div
+            className="bg-white rounded-2xl max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden border border-gray-200/80 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 px-6 py-4 min-w-0 bg-gradient-to-r from-emerald-50 via-teal-50/90 to-cyan-50/80 border-b border-emerald-100/80">
+              <h2 id="evidence-summary-modal-title" className="text-lg font-bold text-gray-900 min-w-0 break-words tracking-tight">
+                {evidenceSummaryModal.title}
+              </h2>
               <button
-                onClick={() => setShowDeleteConfirm(null)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                type="button"
+                onClick={() => setEvidenceSummaryModal(null)}
+                className="p-2 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-white/80 transition-colors"
+                aria-label="Close"
               >
-                Cancel
+                <X className="w-5 h-5" />
               </button>
+            </div>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-5 min-h-0 bg-gray-50/30">
+              <div className="text-[15px] text-gray-800 leading-relaxed break-words min-w-0">
+                <RagResultsWithCitations text={evidenceSummaryModal.content} references={evidenceSummaryModal.references} className="leading-relaxed break-words" compact />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 bg-white flex justify-end">
               <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                type="button"
+                onClick={() => setEvidenceSummaryModal(null)}
+                className="px-5 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-sm hover:shadow"
               >
-                Remove
+                Close
               </button>
             </div>
           </div>

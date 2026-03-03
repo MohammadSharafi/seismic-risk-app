@@ -566,7 +566,7 @@ export function FullTimeline({ patient, onClose, onStartNewVisit, onOpenDiscussi
                               <div className="space-y-1">
                                 {visit.outcome.alarms.slice(0, 3).map((alarm: any, idx: number) => (
                                   <div key={idx} className="text-xs text-amber-800">
-                                    • {alarm.alarm_type || alarm.alarm_summary || 'Alarm'}
+                                    • {alarm.alarm_type || (alarm.alarm_summary && String(alarm.alarm_summary).replace(/\bRisk score\b/gi, 'Intervention Priority Score')) || 'Alarm'}
                                   </div>
                                 ))}
                                 {visit.outcome.alarms.length > 3 && (

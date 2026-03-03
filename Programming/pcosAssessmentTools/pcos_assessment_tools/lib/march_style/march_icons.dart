@@ -66,4 +66,5 @@ class MarchIcons {
   static const pcos_icon_period_calendar='assets/ui/5 (1).png';
   static const default_prof='assets/defaultProfile.png';
   static const logo='assets/march_icon.png';
+  static const shield='assets/shield-check.svg';
 }

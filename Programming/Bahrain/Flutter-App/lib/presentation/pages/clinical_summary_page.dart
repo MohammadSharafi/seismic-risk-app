@@ -3,6 +3,7 @@ import '../../domain/entities/patient.dart';
 import '../theme/app_theme.dart';
 import '../theme/tailwind_spacing.dart';
 import '../utils/lucide_icons.dart';
+import '../widgets/wearables_sync_card.dart';
 
 class ClinicalSummaryPage extends StatefulWidget {
   final Patient patient;
@@ -115,6 +116,8 @@ class _ClinicalSummaryPageState extends State<ClinicalSummaryPage> {
             SizedBox(height: TailwindSpacing.mb3), // mb-3 (further reduced)
             _buildLatestVitals(),
           ],
+          SizedBox(height: TailwindSpacing.mb3),
+          WearablesSyncCard(patient: widget.patient),
           SizedBox(height: TailwindSpacing.mt6),
           Container(
             padding: const EdgeInsets.only(top: TailwindSpacing.p4),

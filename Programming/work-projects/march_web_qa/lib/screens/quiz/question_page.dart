@@ -7,6 +7,7 @@ import '../../models/Questions.dart';
 import '../../models/sendQuestionsResModel.dart';
 import 'components/quiz_progress_bar.dart';
 import 'components/quiz_question_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuestionPage extends StatelessWidget {
   const QuestionPage({super.key});
@@ -61,21 +62,50 @@ class QuestionPage extends StatelessWidget {
           _buildButton(
             text: provider.currentQuestionIndex < provider.questions.length - 1 ? 'Next' : 'Submit',
             onPressed: provider.currentQuestionIndex < provider.questions.length - 1
-                ? provider.nextQuestion
+                ? () async {
+                    if (((provider.selectedAnswers[provider.currentQuestionIndex] is List) && (provider.selectedAnswers[provider.currentQuestionIndex] as List).isEmpty) ||
+                        (provider.selectedAnswers[provider.currentQuestionIndex] == null) ||
+                        (provider.selectedAnswers[provider.currentQuestionIndex] == -1) ||
+                        (provider.selectedAnswers[provider.currentQuestionIndex] == '')) {
+
+                    } else {
+                      ApiService apiService = ApiService();
+                      Map<String,dynamic> answer = provider.currentAnswer();
+                      if(answer['number'] == 1) {
+                        final SharedPreferences _prefs = await SharedPreferences.getInstance();
+                        _prefs.remove('name');
+                        _prefs.remove('email');
+                        _prefs.remove('userIdentifier');
+                      }
+                      await apiService.trackUser(question: answer['question'], answer: answer['ans'], tag: answer['tag'], number: answer['number'].toString());
+
+                      provider.nextQuestion();
+                    }
+
+
+                  }
                 : () async {
+                    try {
+                      Map<String, dynamic> answers = generateJsonFromAnswers(provider);
 
-              final provider = context.watch<QuizProvider>();
-              Map<String, dynamic> answers =  generateJsonFromAnswers(provider);
+                      ApiService apiService = ApiService();
+                      Map<String,dynamic> answer = provider.currentAnswer();
+                      await apiService.trackUser(question: answer['question'], answer:answer['id']=='marketing'? answer['ans']:'', tag: answer['tag'], number: answer['number'].toString());
 
-              ApiService apiService = ApiService();
+                      SendQuestionsResModel response = await apiService.sendQuestion(answers);
+                      print("Response: ${response.message}");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ResultsPage()),
+                      );
 
-              SendQuestionsResModel response = await apiService.sendQuestion(answers);
-              print("Response: ${response.message}");
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ResultsPage()),
-              );
-            },
+                    } catch (e) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ResultsPage()),
+                      );
+                    }
+                  },
             color: provider.currentQuestionIndex < provider.questions.length - 1 ? Colors.blueAccent : Colors.green,
           ),
         ],
@@ -120,21 +150,25 @@ class QuestionPage extends StatelessWidget {
           break;
 
         case QuestionType.singleChoice:
-          if(question.id=='67d3e82d081597b4b305724f'){
+          if (question.id == '67d3e82d081597b4b305724f') {
             userQuestionary.add({
               "stepId": question.id,
-              "answer":(answer==0)?20:((answer==1)?22:((answer==2)?26:(answer==3)?32:36)),
+              "answer": (answer == 0)
+                  ? 20
+                  : ((answer == 1)
+                      ? 22
+                      : ((answer == 2)
+                          ? 26
+                          : (answer == 3)
+                              ? 32
+                              : 36)),
             });
-          }
-          else if(question.id=='67d3e82d081597b4b3057251' && answer<3){
+          } else if (question.id == '67d3e82d081597b4b3057251' && answer < 3) {
             userQuestionary.add({
               "stepId": question.id,
-              "answer": answer<=1?true:false,
+              "answer": answer <= 1 ? true : false,
             });
           }
-
-
-
 
           break;
 
@@ -146,16 +180,15 @@ class QuestionPage extends StatelessWidget {
           break;
 
         case QuestionType.textField:
-        // Handle text field answers
-          if(question.id=='email'){
+          // Handle text field answers
+          if (question.id == 'email') {
             email = answer;
-          } else{
+          } else {
             userQuestionary.add({
               "stepId": question.id,
               "answer": answer.toString(),
             });
           }
-
 
           break;
 
@@ -177,5 +210,4 @@ class QuestionPage extends StatelessWidget {
       "email": email,
     };
   }
-
 }

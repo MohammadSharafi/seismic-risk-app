@@ -1,0 +1,6372 @@
+{
+  "source_repo": "git@github.com:Marchhealth/FluxFHIR.git",
+  "tables": [
+    {
+      "table_name": "CarePlan",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/CarePlanSchema.java",
+      "column_count": 94,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "text_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "text_div",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "instantiatesCanonical_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "intent",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "category_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "category_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "category_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "title",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "description",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "subject_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "subject_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "period_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "period_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "created",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "author_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "author_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "contributor_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "contributor_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "contributor_1_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "contributor_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "careTeam_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "addresses_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "addresses_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "supportingInfo_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "supportingInfo_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "goal_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "goal_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "goal_1_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "goal_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "activity_0_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "activity_0_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "activity_0_statusReason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "activity_0_statusReason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "activity_0_statusReason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "activity_0_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "activity_0_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "activity_0_detail_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "activity_0_detail_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "activity_0_detail_doNotPerform",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "activity_0_detail_scheduledTiming_repeat_periodUnit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "activity_0_detail_location_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "activity_0_detail_location_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "activity_0_detail_performer_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "activity_0_detail_description",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "activity_1_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "activity_1_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "activity_1_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "activity_1_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "activity_1_detail_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "activity_1_detail_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "activity_1_detail_doNotPerform",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "activity_1_detail_scheduledTiming_repeat_periodUnit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "activity_1_detail_description",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "activity_2_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "activity_2_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "activity_2_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "activity_2_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "activity_2_detail_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "activity_2_detail_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "activity_2_detail_doNotPerform",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "activity_2_detail_scheduledTiming_repeat_periodUnit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "activity_2_detail_description",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "activity_3_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 73,
+          "column_name": "activity_3_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 74,
+          "column_name": "activity_3_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 75,
+          "column_name": "activity_3_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 76,
+          "column_name": "activity_3_detail_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 77,
+          "column_name": "activity_3_detail_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 78,
+          "column_name": "activity_3_detail_doNotPerform",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 79,
+          "column_name": "activity_3_detail_description",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 80,
+          "column_name": "activity_4_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 81,
+          "column_name": "activity_4_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 82,
+          "column_name": "activity_4_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 83,
+          "column_name": "activity_4_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 84,
+          "column_name": "activity_4_detail_kind",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 85,
+          "column_name": "activity_4_detail_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 86,
+          "column_name": "activity_4_detail_doNotPerform",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 87,
+          "column_name": "activity_4_detail_scheduledTiming_repeat_periodUnit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 88,
+          "column_name": "activity_4_detail_description",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 89,
+          "column_name": "note_0_authorReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 90,
+          "column_name": "note_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 91,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 92,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 93,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 94,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Condition",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/ConditionSchema.java",
+      "column_count": 58,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "clinicalStatus_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "clinicalStatus_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "clinicalStatus_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "verificationStatus_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "verificationStatus_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "verificationStatus_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "category_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "category_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "category_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "code_coding_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "code_coding_1_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "code_coding_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "subject_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "subject_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "onsetDateTime",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "recordedDate",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "recorder_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "recorder_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "stage_0_summary_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "stage_0_summary_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "stage_0_summary_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "stage_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "stage_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "stage_0_type_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "evidence_0_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "evidence_0_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "evidence_0_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "evidence_1_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "evidence_1_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "evidence_1_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "evidence_0_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "evidence_0_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "evidence_1_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "evidence_1_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "evidence_2_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "evidence_2_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "evidence_2_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "evidence_2_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "evidence_2_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "bodySite_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "bodySite_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "bodySite_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "note_0_authorReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "note_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Encounter",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/EncounterSchema.java",
+      "column_count": 59,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "text_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "text_div",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "class_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "class_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "class_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "type_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "type_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "type_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "type_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "reason_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "reason_0_value_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "reason_0_value_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "reason_0_value_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "subject_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "subject_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "participant_0_type_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "participant_0_type_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "participant_0_type_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "participant_0_actor_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "participant_0_actor_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "participant_1_type_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "participant_1_type_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "participant_1_type_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "participant_1_actor_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "participant_1_actor_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "period_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "period_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "length_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "length_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "length_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "priority_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "priority_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "priority_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "location_0_location_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "location_0_location_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "location_0_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "admission_admitSource_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "admission_admitSource_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "admission_admitSource_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "admission_dischargeDisposition_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "admission_dischargeDisposition_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "admission_dischargeDisposition_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "admission_reAdmission_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "admission_reAdmission_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "admission_reAdmission_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "serviceProvider_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "serviceProvider_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "partOf_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "FallbackJson",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/FallbackJsonSchema.java",
+      "column_count": 6,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "payload",
+          "column_type": "JSON",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "FamilyMemberHistory",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/FamilyMemberHistorySchema.java",
+      "column_count": 102,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_source",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "meta_security_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "meta_security_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "meta_security_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "meta_tag_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "meta_tag_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "meta_tag_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "text_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "text_div",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "identifier_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "identifier_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "identifier_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "identifier_0_type_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "identifier_0_period_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "identifier_0_period_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "identifier_0_assigner_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "instantiatesCanonical_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "instantiatesUri_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "dataAbsentReason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "dataAbsentReason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "dataAbsentReason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "dataAbsentReason_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "patient_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "patient_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "date",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "name",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "relationship_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "relationship_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "relationship_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "relationship_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "sex_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "sex_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "sex_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "sex_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "born_valueDateTime",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "born_valuePeriod_start",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "born_valuePeriod_end",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "born_valueString",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "age_valueAge_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "age_valueAge_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "age_valueAge_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "age_valueRange_low_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "age_valueRange_high_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "age_valueString",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "estimatedAge",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "deceased_valueBoolean",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "deceased_valueDateTime",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "deceased_valueAge_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "deceased_valueRange_low_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "deceased_valueRange_high_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "deceased_valueString",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "reasonCode_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "reasonCode_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "reasonCode_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "reasonCode_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "reasonReference_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "reasonReference_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "participant_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "participant_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "participant_0_type_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "participant_0_actor_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "participant_0_actor_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "encounter_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 73,
+          "column_name": "condition_0_code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 74,
+          "column_name": "condition_0_code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 75,
+          "column_name": "condition_0_code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 76,
+          "column_name": "condition_0_code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 77,
+          "column_name": "condition_0_outcome_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 78,
+          "column_name": "condition_0_outcome_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 79,
+          "column_name": "condition_0_outcome_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 80,
+          "column_name": "condition_0_outcome_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 81,
+          "column_name": "condition_0_contributedToDeath",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 82,
+          "column_name": "condition_0_onsetAge_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 83,
+          "column_name": "condition_0_onsetAge_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 84,
+          "column_name": "condition_0_onsetAge_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 85,
+          "column_name": "condition_0_onsetString",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 86,
+          "column_name": "condition_0_note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 87,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 88,
+          "column_name": "procedure_0_code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 89,
+          "column_name": "procedure_0_code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 90,
+          "column_name": "procedure_0_code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 91,
+          "column_name": "procedure_0_code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 92,
+          "column_name": "procedure_0_outcome_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 93,
+          "column_name": "procedure_0_outcome_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 94,
+          "column_name": "procedure_0_outcome_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 95,
+          "column_name": "procedure_0_outcome_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 96,
+          "column_name": "procedure_0_performedDateTime",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 97,
+          "column_name": "procedure_0_performedPeriod_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 98,
+          "column_name": "procedure_0_performedPeriod_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 99,
+          "column_name": "procedure_0_note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 100,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 101,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 102,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "MedicationAdministration",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/MedicationAdministrationSchema.java",
+      "column_count": 85,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "statusReason_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "statusReason_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "statusReason_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "statusReason_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "category_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "category_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "category_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "category_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "medication_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "medication_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "medication_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "medication_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "medication_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "medication_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "subject_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "subject_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "encounter_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "occurenceDateTime",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "occurencePeriod_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "occurencePeriod_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "occurenceTiming_event_0",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "occurenceString",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "request_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "request_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "reason_0_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "reason_0_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "reason_0_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "reason_0_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "reason_0_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "reason_0_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "supportingInformation_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "supportingInformation_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "performer_0_function_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "performer_0_function_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "performer_0_function_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "performer_0_actor_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "performer_0_actor_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "performer_0_onBehalfOf_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "performer_0_onBehalfOf_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "dosage_site_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "dosage_site_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "dosage_site_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "dosage_site_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "dosage_route_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "dosage_route_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "dosage_route_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "dosage_route_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "dosage_method_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "dosage_method_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "dosage_method_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "dosage_method_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "dosage_dose_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "dosage_dose_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "dosage_dose_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "dosage_rateRatio_numerator_comparator",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "dosage_rateRatio_numerator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "dosage_rateRatio_numerator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "dosage_rateRatio_numerator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "dosage_rateRatio_denominator_comparator",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "dosage_rateRatio_denominator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "dosage_rateRatio_denominator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "dosage_rateRatio_denominator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "dosage_rateQuantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "dosage_rateQuantity_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "dosage_rateQuantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 73,
+          "column_name": "device_0_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 74,
+          "column_name": "device_0_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 75,
+          "column_name": "device_0_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 76,
+          "column_name": "device_0_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 77,
+          "column_name": "device_0_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 78,
+          "column_name": "device_0_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 79,
+          "column_name": "note_0_authorReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 80,
+          "column_name": "note_0_authorReference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 81,
+          "column_name": "note_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 82,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 83,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 84,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 85,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "MedicationRequest",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/MedicationRequestSchema.java",
+      "column_count": 84,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "statusChanged",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "statusReason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "statusReason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "statusReason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "statusReason_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "intent",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "category_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "category_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "category_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "category_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "priority",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "doNotPerform",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "medication_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "medication_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "medication_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "medication_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "subject_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "subject_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "informationSource_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "informationSource_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "authoredOn",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "requester_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "requester_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "reason_0_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "reason_0_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "reason_0_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "reason_0_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "insurance_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "insurance_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "groupIdentifier_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "groupIdentifier_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "basedOn_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "note_0_authorReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "note_0_authorReference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "note_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "dosageInstruction_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "dosageInstruction_0_patientInstruction",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "dosageInstruction_0_timing_repeat_periodUnit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "dosageInstruction_0_timing_repeat_when_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "dosageInstruction_0_route_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "dosageInstruction_0_route_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "dosageInstruction_0_route_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "dosageInstruction_0_route_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "dosageInstruction_0_doseAndRate_0_doseQuantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "dosageInstruction_0_doseAndRate_0_doseQuantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "dosageInstruction_0_maxDosePerAdministration_value",
+          "column_type": "NUMERIC",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "dosageInstruction_0_maxDosePerAdministration_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "dosageInstruction_0_maxDosePerAdministration_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "dosageInstruction_0_maxDosePerAdministration_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "dispenseRequest_initialFill_quantity_value",
+          "column_type": "NUMERIC",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "dispenseRequest_initialFill_quantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "dispenseRequest_initialFill_quantity_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "dispenseRequest_initialFill_quantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "dispenseRequest_initialFill_duration_value",
+          "column_type": "NUMERIC",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "dispenseRequest_initialFill_duration_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "dispenseRequest_initialFill_duration_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "dispenseRequest_initialFill_duration_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "dispenseRequest_quantity_value",
+          "column_type": "NUMERIC",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "dispenseRequest_quantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "dispenseRequest_quantity_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "dispenseRequest_quantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "dispenseRequest_expectedSupplyDuration_value",
+          "column_type": "NUMERIC",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "dispenseRequest_expectedSupplyDuration_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "dispenseRequest_expectedSupplyDuration_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "dispenseRequest_expectedSupplyDuration_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "dispenseRequest_dispenser_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 73,
+          "column_name": "dispenseRequest_dispenser_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 74,
+          "column_name": "dispenseRequest_dispenserInstruction_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 75,
+          "column_name": "dispenseRequest_dispenserInstruction_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 76,
+          "column_name": "substitution_allowedBoolean",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 77,
+          "column_name": "substitution_reason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 78,
+          "column_name": "substitution_reason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 79,
+          "column_name": "substitution_reason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 80,
+          "column_name": "substitution_reason_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 81,
+          "column_name": "eventHistory_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 82,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 83,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 84,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Medication",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/MedicationSchema.java",
+      "column_count": 80,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_source",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "meta_security_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "meta_security_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "meta_security_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "meta_tag_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "meta_tag_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "meta_tag_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "text_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "text_div",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "identifier_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "identifier_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "identifier_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "identifier_0_type_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "identifier_0_period_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "identifier_0_period_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "identifier_0_assigner_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "identifier_1_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "identifier_1_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "identifier_1_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "identifier_1_type_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "identifier_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "identifier_1_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "identifier_1_period_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "identifier_1_period_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "identifier_1_assigner_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "code_coding_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "code_coding_1_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "code_coding_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "doseForm_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "doseForm_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "doseForm_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "doseForm_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "amount_numerator_comparator",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "amount_numerator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "amount_numerator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "amount_numerator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "amount_denominator_comparator",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "amount_denominator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "amount_denominator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "amount_denominator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "ingredient_0_item_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "ingredient_0_item_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "ingredient_0_item_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "ingredient_0_item_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "ingredient_0_item_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "ingredient_0_isActive",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "ingredient_0_strength_numerator_comparator",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "ingredient_0_strength_numerator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "ingredient_0_strength_numerator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "ingredient_0_strength_numerator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "ingredient_0_strength_denominator_comparator",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "ingredient_0_strength_denominator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "ingredient_0_strength_denominator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "ingredient_0_strength_denominator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "batch_lotNumber",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "batch_expirationDate",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "manufacturer_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "manufacturer_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "marketingAuthorizationHolder_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "marketingAuthorizationHolder_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 73,
+          "column_name": "pureSubstance_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 74,
+          "column_name": "pureSubstance_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 75,
+          "column_name": "pureSubstance_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 76,
+          "column_name": "pureSubstance_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 77,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 78,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 79,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 80,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Observation",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/ObservationSchema.java",
+      "column_count": 206,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "text_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "text_div",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "effectiveDateTime",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "effectiveInstant",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "effectivePeriod_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "effectivePeriod_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "issued",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "effectiveTiming_repeat_periodUnit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "subject_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "subject_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "subject_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "encounter_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "encounter_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "performer_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "performer_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "performer_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "performer_1_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "performer_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "performer_1_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "device_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "device_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "device_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "specimen_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "specimen_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "specimen_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "basedOn_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "basedOn_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "basedOn_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "partOf_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "partOf_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "partOf_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "hasMember_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "hasMember_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "hasMember_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "hasMember_1_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "hasMember_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "hasMember_1_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "hasMember_2_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "hasMember_2_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "hasMember_2_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "focus_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "focus_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "focus_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "bodySite_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "bodySite_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "bodySite_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "bodySite_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "bodyStructure_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "bodyStructure_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "bodyStructure_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "triggeredBy_0_observation_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "triggeredBy_0_observation_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "triggeredBy_0_observation_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "triggeredBy_0_reason",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "triggeredBy_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "category_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "category_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "category_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "category_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 73,
+          "column_name": "code_coding_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 74,
+          "column_name": "code_coding_1_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 75,
+          "column_name": "code_coding_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 76,
+          "column_name": "code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 77,
+          "column_name": "instantiatesCanonical_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 78,
+          "column_name": "instantiatesReference_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 79,
+          "column_name": "instantiatesReference_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 80,
+          "column_name": "instantiatesReference_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 81,
+          "column_name": "method_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 82,
+          "column_name": "method_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 83,
+          "column_name": "method_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 84,
+          "column_name": "method_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 85,
+          "column_name": "valueQuantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 86,
+          "column_name": "valueQuantity_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 87,
+          "column_name": "valueQuantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 88,
+          "column_name": "valueQuantity_comparator",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 89,
+          "column_name": "valueCodeableConcept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 90,
+          "column_name": "valueCodeableConcept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 91,
+          "column_name": "valueCodeableConcept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 92,
+          "column_name": "valueCodeableConcept_coding_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 93,
+          "column_name": "valueCodeableConcept_coding_1_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 94,
+          "column_name": "valueCodeableConcept_coding_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 95,
+          "column_name": "valueCodeableConcept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 96,
+          "column_name": "valueString",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 97,
+          "column_name": "valueBoolean",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 98,
+          "column_name": "valueTime",
+          "column_type": "TIME",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 99,
+          "column_name": "valueRange_low_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 100,
+          "column_name": "valueRange_high_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 101,
+          "column_name": "valueRatio_numerator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 102,
+          "column_name": "valueRatio_denominator_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 103,
+          "column_name": "valuePeriod_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 104,
+          "column_name": "valuePeriod_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 105,
+          "column_name": "valueAttachment_contentType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 106,
+          "column_name": "valueAttachment_creation",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 107,
+          "column_name": "valueAttachment_url",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 108,
+          "column_name": "valueAttachment_title",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 109,
+          "column_name": "valueSampledData_data",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 110,
+          "column_name": "component_0_code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 111,
+          "column_name": "component_0_code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 112,
+          "column_name": "component_0_code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 113,
+          "column_name": "component_0_valueQuantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 114,
+          "column_name": "component_0_valueQuantity_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 115,
+          "column_name": "component_0_valueQuantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 116,
+          "column_name": "component_0_interpretation_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 117,
+          "column_name": "component_0_interpretation_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 118,
+          "column_name": "component_0_interpretation_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 119,
+          "column_name": "component_0_referenceRange_0_low_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 120,
+          "column_name": "component_0_referenceRange_0_high_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 121,
+          "column_name": "component_0_dataAbsentReason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 122,
+          "column_name": "component_0_dataAbsentReason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 123,
+          "column_name": "component_0_dataAbsentReason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 124,
+          "column_name": "component_1_code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 125,
+          "column_name": "component_1_code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 126,
+          "column_name": "component_1_code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 127,
+          "column_name": "component_1_valueQuantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 128,
+          "column_name": "component_1_valueQuantity_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 129,
+          "column_name": "component_1_valueQuantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 130,
+          "column_name": "component_1_interpretation_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 131,
+          "column_name": "component_1_interpretation_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 132,
+          "column_name": "component_1_interpretation_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 133,
+          "column_name": "component_2_code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 134,
+          "column_name": "component_2_code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 135,
+          "column_name": "component_2_code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 136,
+          "column_name": "component_2_valueQuantity_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 137,
+          "column_name": "component_2_valueQuantity_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 138,
+          "column_name": "component_2_valueQuantity_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 139,
+          "column_name": "referenceRange_0_high_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 140,
+          "column_name": "referenceRange_0_high_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 141,
+          "column_name": "referenceRange_0_high_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 142,
+          "column_name": "referenceRange_0_low_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 143,
+          "column_name": "referenceRange_0_low_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 144,
+          "column_name": "referenceRange_0_low_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 145,
+          "column_name": "referenceRange_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 146,
+          "column_name": "referenceRange_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 147,
+          "column_name": "referenceRange_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 148,
+          "column_name": "referenceRange_0_type_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 149,
+          "column_name": "referenceRange_0_appliesTo_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 150,
+          "column_name": "referenceRange_0_appliesTo_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 151,
+          "column_name": "referenceRange_0_appliesTo_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 152,
+          "column_name": "referenceRange_0_age_low_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 153,
+          "column_name": "referenceRange_0_age_low_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 154,
+          "column_name": "referenceRange_0_age_low_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 155,
+          "column_name": "referenceRange_0_age_high_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 156,
+          "column_name": "referenceRange_0_age_high_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 157,
+          "column_name": "referenceRange_0_age_high_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 158,
+          "column_name": "interpretation_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 159,
+          "column_name": "interpretation_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 160,
+          "column_name": "interpretation_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 161,
+          "column_name": "interpretation_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 162,
+          "column_name": "dataAbsentReason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 163,
+          "column_name": "dataAbsentReason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 164,
+          "column_name": "dataAbsentReason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 165,
+          "column_name": "identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 166,
+          "column_name": "identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 167,
+          "column_name": "identifier_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 168,
+          "column_name": "identifier_0_period_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 169,
+          "column_name": "identifier_0_assigner_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 170,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 171,
+          "column_name": "note_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 172,
+          "column_name": "note_0_authorReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 173,
+          "column_name": "note_1_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 174,
+          "column_name": "identifier_0_assigner_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 175,
+          "column_name": "note_0_authorReference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 176,
+          "column_name": "valueAttachment_data",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 177,
+          "column_name": "valueAttachment_hash",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 178,
+          "column_name": "identifier_0_period_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 179,
+          "column_name": "authored",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 180,
+          "column_name": "code_coding_0_version",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 181,
+          "column_name": "device_identifier",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 182,
+          "column_name": "encounter_identifier_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 183,
+          "column_name": "encounter_identifier_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 184,
+          "column_name": "meta_profile_1",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 185,
+          "column_name": "meta_profile_2",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 186,
+          "column_name": "meta_source",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 187,
+          "column_name": "note_1_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 188,
+          "column_name": "note_2_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 189,
+          "column_name": "performer_0_identifier_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 190,
+          "column_name": "performer_0_identifier_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 191,
+          "column_name": "specimen_identifier_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 192,
+          "column_name": "specimen_identifier_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 193,
+          "column_name": "subject_identifier_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 194,
+          "column_name": "subject_identifier_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 195,
+          "column_name": "valueAttachment_language",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 196,
+          "column_name": "valueRange_high_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 197,
+          "column_name": "valueRange_high_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 198,
+          "column_name": "valueRange_low_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 199,
+          "column_name": "valueRange_low_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 200,
+          "column_name": "valueRatio_denominator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 201,
+          "column_name": "valueRatio_denominator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 202,
+          "column_name": "valueRatio_numerator_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 203,
+          "column_name": "valueRatio_numerator_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 204,
+          "column_name": "valueReference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 205,
+          "column_name": "valueReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 206,
+          "column_name": "valueReference_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Patient",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/PatientSchema.java",
+      "column_count": 42,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "active",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "gender",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "birth_date",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "marital_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "medical_record_number",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "name_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "name_0_family",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "name_0_given",
+          "column_type": "STRING",
+          "mode": "REPEATED"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "name_0_prefix",
+          "column_type": "STRING",
+          "mode": "REPEATED"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "name_1_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "name_1_family",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "name_1_given",
+          "column_type": "STRING",
+          "mode": "REPEATED"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "name_1_prefix",
+          "column_type": "STRING",
+          "mode": "REPEATED"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "address_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "address_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "address_0_line",
+          "column_type": "STRING",
+          "mode": "REPEATED"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "address_0_city",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "address_0_district",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "address_0_state",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "address_0_postal_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "address_0_country",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "address_1_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "address_1_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "address_1_line",
+          "column_type": "STRING",
+          "mode": "REPEATED"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "address_1_city",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "address_1_district",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "address_1_state",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "address_1_postal_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "address_1_country",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "generalPractitioner_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "generalPractitioner_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "generalPractitioner_1_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "generalPractitioner_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "managingOrganization_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "managingOrganization_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "race",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "ethnicity",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Practitioner",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/PractitionerSchema.java",
+      "column_count": 72,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "text_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "text_div",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "identifier_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "identifier_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "identifier_1_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "identifier_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "identifier_2_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "identifier_2_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "identifier_2_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "active",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "name_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "name_0_family",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "name_0_given_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "name_0_prefix_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "name_1_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "name_1_family",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "name_1_given_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "name_1_given_1",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "telecom_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "telecom_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "telecom_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "telecom_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "telecom_1_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "telecom_1_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "telecom_2_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "telecom_2_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "telecom_2_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "address_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "address_0_type",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "address_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "address_0_line_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "address_0_line_1",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "address_0_city",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "address_0_state",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "address_0_postalCode",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "address_0_country",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "gender",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "birthDate",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "qualification_0_identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "qualification_0_identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "qualification_0_code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "qualification_0_code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "qualification_0_code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "qualification_0_code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "qualification_0_period_start",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "qualification_0_period_end",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "qualification_0_issuer_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "qualification_1_code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "qualification_1_code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "qualification_1_code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "qualification_1_code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "qualification_1_period_start",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "qualification_1_period_end",
+          "column_type": "DATE",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "qualification_1_issuer_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "communication_0_language_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "communication_0_language_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "communication_0_language_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "communication_0_preferred",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "communication_1_language_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "communication_1_language_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "communication_1_language_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "communication_1_preferred",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Procedure",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/ProcedureSchema.java",
+      "column_count": 67,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "category_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "category_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "category_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "category_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "code_coding_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "code_coding_1_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "code_coding_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "subject_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "subject_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "encounter_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "occurrencePeriod_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "occurrencePeriod_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "occurrenceDateTime",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "recorded",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "recorder_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "recorder_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "performer_0_actor_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "performer_0_actor_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "performer_0_function_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "performer_0_function_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "performer_0_function_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "performer_1_actor_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "performer_1_actor_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "performer_1_function_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "performer_1_function_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "performer_1_function_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "location_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "location_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "reason_0_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "reason_0_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "reason_0_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "reason_0_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "reason_0_reference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "reason_0_reference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "bodySite_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "bodySite_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "bodySite_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "bodySite_0_coding_1_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "bodySite_0_coding_1_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "bodySite_0_coding_1_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "bodySite_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "usedCode_0_concept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "usedCode_0_concept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "usedCode_0_concept_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "usedCode_0_concept_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "report_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "report_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "statusReason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "statusReason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "statusReason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "outcome_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "outcome_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "outcome_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "outcome_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "note_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    },
+    {
+      "table_name": "Task",
+      "schema_file": "src/main/java/com/fluxfhir/opt/v2/infrastructure/bigquery/schema/TaskSchema.java",
+      "column_count": 91,
+      "columns": [
+        {
+          "ordinal": 1,
+          "column_name": "id",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 2,
+          "column_name": "resourceType",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 3,
+          "column_name": "meta_versionId",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 4,
+          "column_name": "meta_lastUpdated",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 5,
+          "column_name": "meta_source",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 6,
+          "column_name": "meta_profile_0",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 7,
+          "column_name": "meta_security_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 8,
+          "column_name": "meta_security_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 9,
+          "column_name": "meta_security_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 10,
+          "column_name": "meta_tag_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 11,
+          "column_name": "meta_tag_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 12,
+          "column_name": "meta_tag_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 13,
+          "column_name": "text_status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 14,
+          "column_name": "text_div",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 15,
+          "column_name": "identifier_0_use",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 16,
+          "column_name": "identifier_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 17,
+          "column_name": "identifier_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 18,
+          "column_name": "identifier_0_type_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 19,
+          "column_name": "identifier_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 20,
+          "column_name": "identifier_0_value",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 21,
+          "column_name": "identifier_0_period_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 22,
+          "column_name": "identifier_0_period_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 23,
+          "column_name": "identifier_0_assigner_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 24,
+          "column_name": "status",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 25,
+          "column_name": "statusReason_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 26,
+          "column_name": "statusReason_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 27,
+          "column_name": "statusReason_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 28,
+          "column_name": "statusReason_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 29,
+          "column_name": "businessStatus_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 30,
+          "column_name": "businessStatus_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 31,
+          "column_name": "businessStatus_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 32,
+          "column_name": "businessStatus_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 33,
+          "column_name": "intent",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 34,
+          "column_name": "priority",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 35,
+          "column_name": "code_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 36,
+          "column_name": "code_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 37,
+          "column_name": "code_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 38,
+          "column_name": "code_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 39,
+          "column_name": "description",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 40,
+          "column_name": "focus_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 41,
+          "column_name": "focus_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 42,
+          "column_name": "focus_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 43,
+          "column_name": "focus_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 44,
+          "column_name": "basedOn_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 45,
+          "column_name": "basedOn_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 46,
+          "column_name": "dependency_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 47,
+          "column_name": "dependency_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 48,
+          "column_name": "for_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 49,
+          "column_name": "for_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 50,
+          "column_name": "encounter_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 51,
+          "column_name": "encounter_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 52,
+          "column_name": "authoredOn",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 53,
+          "column_name": "lastModified",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 54,
+          "column_name": "requester_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 55,
+          "column_name": "requester_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 56,
+          "column_name": "requester_onBehalfOf_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 57,
+          "column_name": "requester_onBehalfOf_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 58,
+          "column_name": "owner_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 59,
+          "column_name": "owner_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 60,
+          "column_name": "reasonCode_0_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 61,
+          "column_name": "reasonCode_0_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 62,
+          "column_name": "reasonCode_0_coding_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 63,
+          "column_name": "reasonCode_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 64,
+          "column_name": "reasonReference_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 65,
+          "column_name": "reasonReference_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 66,
+          "column_name": "executionPeriod_start",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 67,
+          "column_name": "executionPeriod_end",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 68,
+          "column_name": "scheduledTiming_event_0",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 69,
+          "column_name": "scheduledTiming_repeat_boundsDuration_unit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 70,
+          "column_name": "scheduledTiming_repeat_boundsDuration_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 71,
+          "column_name": "scheduledTiming_repeat_boundsDuration_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 72,
+          "column_name": "scheduledTiming_repeat_periodUnit",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 73,
+          "column_name": "input_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 74,
+          "column_name": "input_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 75,
+          "column_name": "input_0_valueReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 76,
+          "column_name": "input_0_valueReference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 77,
+          "column_name": "input_0_valueCodeableConcept_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 78,
+          "column_name": "input_0_valueCodeableConcept_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 79,
+          "column_name": "output_0_type_coding_0_system",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 80,
+          "column_name": "output_0_type_coding_0_code",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 81,
+          "column_name": "output_0_valueReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 82,
+          "column_name": "output_0_valueReference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 83,
+          "column_name": "note_0_authorReference_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 84,
+          "column_name": "note_0_authorReference_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 85,
+          "column_name": "note_0_time",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 86,
+          "column_name": "note_0_text",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 87,
+          "column_name": "relevantHistory_0_reference",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 88,
+          "column_name": "relevantHistory_0_display",
+          "column_type": "STRING",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 89,
+          "column_name": "createdAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 90,
+          "column_name": "updatedAt",
+          "column_type": "TIMESTAMP",
+          "mode": "NULLABLE"
+        },
+        {
+          "ordinal": 91,
+          "column_name": "isDeleted",
+          "column_type": "BOOL",
+          "mode": "NULLABLE"
+        }
+      ]
+    }
+  ]
+}

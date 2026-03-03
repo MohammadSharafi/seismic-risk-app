@@ -227,7 +227,7 @@ export function DoctorDashboard({ onOpenPatient, loggedInPractitioner }: DoctorD
             console.log('🔍 Processing alarm:', { 
               alarmId: alarm.id, 
               patientId: alarm.patientId || alarm.patient_id, 
-              message: alarm.message || alarm.alarmSummary
+              message: alarm.message || alarm.alarmSummary || alarm.alarm_summary
             });
             
             const patientId = alarm.patientId || alarm.patient_id;
@@ -267,10 +267,11 @@ export function DoctorDashboard({ onOpenPatient, loggedInPractitioner }: DoctorD
             return {
               id: alarm.id || `alarm_${patientId}`,
               patient: patient,
-              summary: alarm.message || alarm.alarmSummary || 'Alarm triggered',
+              summary: alarm.message || alarm.alarmSummary || alarm.alarm_summary || 'Alarm triggered',
               timeTriggered: timeDisplay,
               acknowledged: alarm.status === 'CLOSED' || alarm.status === 'ACKNOWLEDGED',
-              severity: alarm.severity || null, // Store severity from API
+              // Prefer explicit severity, fall back to tier from backend
+              severity: alarm.severity || alarm.tier || null,
             };
           })
           .filter((a: Alarm | null) => a !== null) as Alarm[];
@@ -304,9 +305,9 @@ export function DoctorDashboard({ onOpenPatient, loggedInPractitioner }: DoctorD
   });
 
   const filteredAlarms = alarms.filter(alarm => {
-    // Only show CRITICAL and HIGH severity alarms
+    // Only show CRITICAL severity alarms
     const severity = alarm.severity?.toUpperCase();
-    if (severity !== 'CRITICAL' && severity !== 'HIGH') {
+    if (severity !== 'CRITICAL') {
       return false;
     }
     return true;
@@ -395,7 +396,7 @@ export function DoctorDashboard({ onOpenPatient, loggedInPractitioner }: DoctorD
               {filteredAlarms.map((alarm) => {
                 // Map severity to tier for display
                 const displayTier = mapSeverityToTier(alarm.severity || '');
-                if (!displayTier || (displayTier !== 'Critical' && displayTier !== 'High')) {
+                if (!displayTier || displayTier !== 'Critical') {
                   return null; // Should not happen due to filter, but safety check
                 }
                 
@@ -407,7 +408,7 @@ export function DoctorDashboard({ onOpenPatient, loggedInPractitioner }: DoctorD
                           <span className="font-medium text-gray-900">{alarm.patient.name}</span>
                           <RiskBadge tier={displayTier} />
                         </div>
-                        <p className="text-sm text-gray-700 mb-2">{alarm.summary}</p>
+                        <p className="text-sm text-gray-700 mb-2">{(alarm.summary || 'Alarm triggered').replace(/\bRisk score\b/gi, 'Intervention Priority Score')}</p>
                         <div className="flex items-center gap-1 text-sm text-gray-500">
                           <Clock className="w-4 h-4" />
                           <span>{alarm.timeTriggered}</span>

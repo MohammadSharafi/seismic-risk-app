@@ -10,54 +10,20 @@ class QuestionController extends GetxController {
   final RxInt numOfCorrectAnswers = 0.obs;
   final RxList<QuestionAnswer> questionAnswers = <QuestionAnswer>[].obs;
   late List<Question> questions;
-  Timer? _timer;
   final int _questionDuration = 10;
 
   @override
   void onClose() {
-    _timer?.cancel();
     super.onClose();
   }
 
   void initialize(List<Question> questionList) {
     questions = questionList;
     _initQuestionAnswers();
-    _startTimer();
   }
 
   void _initQuestionAnswers() {
-    questionAnswers.assignAll(
-        List.generate(questions.length, (index) => QuestionAnswer())
-    );
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    progress.value = 0.0;
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (progress.value >= 1) {
-        _handleTimerCompletion();
-        timer.cancel();
-      } else {
-        progress.value += 1 / _questionDuration;
-      }
-    });
-  }
-
-  void _handleTimerCompletion() {
-    if (questionNumber.value < questions.length) {
-      nextQuestion();
-    } else {
-      Get.toNamed('/score');
-    }
-  }
-
-  void nextQuestion() {
-    if (questionNumber.value < questions.length) {
-      questionNumber.value++;
-      _startTimer();
-    }
+    questionAnswers.assignAll(List.generate(questions.length, (index) => QuestionAnswer()));
   }
 
   void checkAnswer(int questionIndex) {
@@ -75,9 +41,7 @@ class QuestionController extends GetxController {
     if (qa.isAnswered.value) return;
 
     if (isMultiSelect) {
-      qa.selectedAnswers.contains(selectedIndex)
-          ? qa.selectedAnswers.remove(selectedIndex)
-          : qa.selectedAnswers.add(selectedIndex);
+      qa.selectedAnswers.contains(selectedIndex) ? qa.selectedAnswers.remove(selectedIndex) : qa.selectedAnswers.add(selectedIndex);
     } else {
       qa.selectedAnswers.value = [selectedIndex];
     }
@@ -88,9 +52,6 @@ class QuestionAnswer {
   final RxList<int> selectedAnswers = <int>[].obs;
   final RxBool isAnswered = false.obs;
 }
-
-
-
 
 class QuizProvider with ChangeNotifier {
   late PageController _pageController;
@@ -104,9 +65,40 @@ class QuizProvider with ChangeNotifier {
   }
 
   PageController get pageController => _pageController;
+
   int get currentQuestionIndex => _currentQuestionIndex;
+
   List<Question> get questions => _questions;
+
   List<dynamic> get selectedAnswers => _selectedAnswers;
+
+  Question currentQuestion() {
+    return _questions[_currentQuestionIndex];
+  }
+
+  Map<String, dynamic> currentAnswer() {
+    final answer = _selectedAnswers[_currentQuestionIndex];
+    Question question = currentQuestion();
+
+    switch (question.type) {
+      case QuestionType.multipleChoice:
+        return {'ans': (answer as List<int>).map((index){ return question.options![index];   }).toList().join(", "), 'question': question.question, 'tag': question.tag, 'number': _currentQuestionIndex + 1,'id':question.id};
+      case QuestionType.numberField:
+      case QuestionType.slider:
+        return {'ans': answer.toString(), 'question': question.question, 'tag': question.tag, 'number': _currentQuestionIndex + 1,'id':question.id};
+
+      case QuestionType.singleChoice:
+        return {'ans': question.options![answer], 'question': question.question, 'tag': question.tag, 'number': _currentQuestionIndex + 1,'id':question.id};
+
+      case QuestionType.textField:
+        return {'ans': answer as String, 'question': question.question, 'tag': question.tag, 'number': _currentQuestionIndex + 1,'id':question.id};
+      case QuestionType.periodCalendar:
+      case QuestionType.calendar:
+        return {'ans': (answer as DateTime).toIso8601String(), 'question': question.question, 'tag': question.tag, 'number': _currentQuestionIndex + 1,'id':question.id};
+      default:
+        return {'ans': '', 'question': '', 'tag': '', 'number': 0,'id':''}; // Handle unexpected cases
+    }
+  }
 
   void initialize(List<Question> questions) {
     _questions = questions;
@@ -151,8 +143,7 @@ class QuizProvider with ChangeNotifier {
   void nextQuestion() {
     if (_currentQuestionIndex < _questions.length - 1) {
       _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-    } else {
-    }
+    } else {}
   }
 
   void previousQuestion() {
@@ -160,7 +151,6 @@ class QuizProvider with ChangeNotifier {
       _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     }
   }
-
 
   @override
   void dispose() {

@@ -1,11 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:pcos_assessment_tools/march_style/march_size.dart';
 import 'package:pcos_assessment_tools/question_list.dart';
 import 'package:pcos_assessment_tools/req_model_class.dart';
 
+import 'API/injection.dart';
+import 'API/send_answer_status.dart';
+import 'API/userservice.dart';
 import 'challenge_res_model.dart';
 import 'message_state.dart';
 
@@ -18,6 +22,7 @@ class HairAnswer {
 
 class ChatProvider extends ChangeNotifier {
   List<Message> _messages = [];
+  bool _isLoading = false;
 
   String _email = '';
   String _name = '';
@@ -28,8 +33,21 @@ class ChatProvider extends ChangeNotifier {
   double _height = 0.0;
   double _bmi = 0.0;
   bool? _userAnswer;
-
+  int _currentQuestionIndex = 0;
+  int _currentHairQuestionIndex = -1;
+   Map<String, Message> _userResponses = {};
   String get name => _name;
+  int _currentMessageIndexInUi = 0;
+  int _targetQuestionIndex = 0;
+  bool _editing = false;
+
+
+  bool get isLoading => _isLoading;
+
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   set name(String value) {
     _name = value;
@@ -43,7 +61,6 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  int _currentMessageIndexInUi = 0;
 
   int get currentMessageIndexInUi => _currentMessageIndexInUi;
 
@@ -52,9 +69,7 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  int _currentQuestionIndex = 0;
-  int _currentHairQuestionIndex = -1;
-  final Map<String, Message> _userResponses = {};
+
 
   ChatProvider() {
     // Initialize the first question
@@ -75,12 +90,25 @@ class ChatProvider extends ChangeNotifier {
   }
 
   // Navigate to the next question
-  void nextQuestion() {
+  Future<void> nextQuestion() async {
+    if (!_editing) {
+      addMessage(
+        Message(
+          id: 'loading',
+          isSystem: false,
+          questionType: QuestionType.loading,
+        ),
+      );
+      notifyListeners();
+
+      await Future.delayed(const Duration(seconds: 2));
+      _messages.removeLast();
+    }
     _currentMessageIndexInUi++;
 
     int userResponseIndex = _messages.indexWhere((msg) => msg.id == 'user_EXPERIENCING_HIRSUTISM_TYPES');
 
-    if (userResponseIndex != -1 && _currentHairQuestionIndex< (_messages[userResponseIndex].options ?? []).where((option) => option.isSelected == true).length - 1 && (_messages[userResponseIndex].options?.where((option) => (option.isSelected && !option.id!.contains('NONE'))).toList() ?? []).isNotEmpty) {
+    if (userResponseIndex != -1 && _currentHairQuestionIndex < (_messages[userResponseIndex].options ?? []).where((option) => option.isSelected == true).length - 1 && (_messages[userResponseIndex].options?.where((option) => (option.isSelected && !option.id!.contains('NONE'))).toList() ?? []).isNotEmpty) {
       _currentHairQuestionIndex++;
       addMessage(getHairGrowthQuestionById((_messages[userResponseIndex].options?.where((option) => option.isSelected).toList() ?? []).elementAt(_currentHairQuestionIndex).id ?? ''));
     } else {
@@ -89,6 +117,12 @@ class ChatProvider extends ChangeNotifier {
         addMessage(questionList[_currentQuestionIndex]);
       }
     }
+
+
+
+
+
+
   }
 
   void update() {
@@ -105,6 +139,8 @@ class ChatProvider extends ChangeNotifier {
     return _bmi;
   }
 
+
+
   // Update user response
   void updateUserResponse(String questionId, Message? response) {
     _userResponses[questionId] = response ?? Message(id: '');
@@ -113,38 +149,56 @@ class ChatProvider extends ChangeNotifier {
     switch (response?.id) {
       case 'GET_NAME':
         _name = response?.userResponse ?? '';
+        callApi(questionId: 'GET_NAME', question: 'What can I call you?', answer: _name);
+
         break;
 
       case 'PAST_6_MONTH_AVG_CYCLE':
         _menstrualCycleTyp = response?.options?.first.id ?? '';
+        callApi(questionId: 'PAST_6_MONTH_AVG_CYCLE', question: 'Considering the past 6 months, what has been the average length of your menstrual cycle?', answer: _menstrualCycleTyp);
+
         break;
 
       case 'HAIR_GROWTH_CHIN_EXPERIENCING_HIRSUTISM_TYPES':
         _answer.add(HairAnswer('Chin', int.parse(response?.options?.first.id ?? '0')));
+        callApi(questionId: 'HAIR_GROWTH_CHIN_EXPERIENCING_HIRSUTISM_TYPES', question: 'Rate the hair growth on your chin', answer:response?.options?.first.id ?? 'EMPTY');
+
 
         break;
 
       case 'HAIR_GROWTH_LOWER_ABDOMEN_EXPERIENCING_HIRSUTISM_TYPES':
         _answer.add(HairAnswer('Lower Abdomen', int.parse(response?.options?.first.id ?? '0')));
+        callApi(questionId: 'HAIR_GROWTH_LOWER_ABDOMEN_EXPERIENCING_HIRSUTISM_TYPES', question: 'Rate the hair growth on your lower abdomen', answer: response?.options?.first.id ?? 'EMPTY');
+
         break;
 
       case 'HAIR_GROWTH_THIGHS_EXPERIENCING_HIRSUTISM_TYPES':
         _answer.add(HairAnswer('Thighs', int.parse(response?.options?.first.id ?? '0')));
+        callApi(questionId: 'HAIR_GROWTH_THIGHS_EXPERIENCING_HIRSUTISM_TYPES', question: 'Rate the hair growth on your thighs', answer: response?.options?.first.id ?? 'EMPTY');
+
         break;
 
       case 'HAIR_GROWTH_UPPER_LIP_EXPERIENCING_HIRSUTISM_TYPES':
         _answer.add(HairAnswer('Upper Lip', int.parse(response?.options?.first.id ?? '0')));
+        callApi(questionId: 'HAIR_GROWTH_UPPER_LIP_EXPERIENCING_HIRSUTISM_TYPES', question: 'Rate the hair growth on your upper lip', answer: response?.options?.first.id ?? 'EMPTY');
+
         break;
       case 'HOW_MANY_PIMPLES':
         _pimplesStatus = response?.options?.first.id ?? '';
+        callApi(questionId: 'HOW_MANY_PIMPLES', question: 'How many pimples do you have on any areas, such as your forehead, cheeks, chin, or nose?', answer: response?.options?.first.id ?? '');
+
         break;
 
       case 'TO_CALCULATE_BMI_TELL_WEIGHT':
         _weight = double.tryParse(response?.userResponse ?? '0.0') ?? int.tryParse(response?.userResponse ?? '0')?.toDouble() ?? 0.0;
+        callApi(questionId: 'TO_CALCULATE_BMI_TELL_WEIGHT', question: 'To calculate your BMI, tell me your weight', answer: response?.userResponse ?? 'EMPTY');
+
         break;
 
       case 'TO_CALCULATE_BMI_TELL_HEIGHT':
         _height = double.tryParse(response?.userResponse ?? '0.0') ?? int.tryParse(response?.userResponse ?? '0')?.toDouble() ?? 0.0;
+        callApi(questionId: 'TO_CALCULATE_BMI_TELL_HEIGHT', question: 'and your height', answer: response?.userResponse ?? 'EMPTY');
+
         break;
 
       case 'HAVE_CLOSE_RELATIVES_HAVE_PCOS':
@@ -153,17 +207,19 @@ class ChatProvider extends ChangeNotifier {
             : ((response?.userResponse ?? '').toUpperCase()) == 'NO'
                 ? false
                 : null;
+        callApi(questionId: 'HAVE_CLOSE_RELATIVES_HAVE_PCOS', question: 'Have any of your close relatives, like your mother, sister, or children, been diagnosed with PCOS?', answer: (response?.userResponse ?? 'EMPTY').toUpperCase());
+
         break;
 
       case 'EMAIL_ADDRESS':
         _email = response?.userResponse ?? '';
+        callApi(questionId: 'EMAIL_ADDRESS', question: 'Before viewing your personalized results, share your preferred email address to access your full results.', answer: _email);
+
         break;
 
       default:
         break;
     }
-
-
 
     // Locate the index of the question message
     int questionIndex = _messages.indexWhere((msg) => msg.id == questionId);
@@ -196,12 +252,15 @@ class ChatProvider extends ChangeNotifier {
     print("After update: ${_messages.map((msg) => msg.id).toList()}");
 
     notifyListeners();
-    if(!_editing)
-    nextQuestion();
-    else{_editing=false;}
+    if (!_editing)
+      nextQuestion();
+    else {
+      _editing = false;
+    }
   }
-  void addTarget(){
-    _targetQuestionIndex=_targetQuestionIndex+1;
+
+  void addTarget() {
+    _targetQuestionIndex = _targetQuestionIndex + 1;
   }
 
   int get targetQuestionIndex => _targetQuestionIndex;
@@ -211,12 +270,11 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  int _targetQuestionIndex = 0;
 
-  bool _editing=false;
+
 // Method in your ChatProvider class to handle editing a response
   void editResponse(String messageId) {
-    if(messageId!='EXPERIENCING_HIRSUTISM_TYPES') {
+    if (messageId != 'EXPERIENCING_HIRSUTISM_TYPES') {
       _editing = true;
     }
     // Find the index of the message in the list based on the message ID
@@ -241,19 +299,16 @@ class ChatProvider extends ChangeNotifier {
         );
 
         if (questionMessage.id == 'EXPERIENCING_HIRSUTISM_TYPES') {
-          _answer=[];
-          _currentMessageIndexInUi=7;
-          _currentHairQuestionIndex=-1;
-          _currentQuestionIndex=7;
-        int indexOfMessage= _messages.indexOf(message);
-        List<Message> shouldBeRemoved = _messages.sublist(indexOfMessage+1);
-          shouldBeRemoved.forEach((data){
+          _answer = [];
+          _currentMessageIndexInUi = 7;
+          _currentHairQuestionIndex = -1;
+          _currentQuestionIndex = 7;
+          int indexOfMessage = _messages.indexOf(message);
+          List<Message> shouldBeRemoved = _messages.sublist(indexOfMessage + 1);
+          shouldBeRemoved.forEach((data) {
             _userResponses.remove('${data.id.replaceFirst('user_', '')}');
-
           });
-          _messages=_messages.sublist(0,indexOfMessage+1);
-
-
+          _messages = _messages.sublist(0, indexOfMessage + 1);
         }
 
         // Update the question in the list
@@ -322,7 +377,7 @@ class ChatProvider extends ChangeNotifier {
             return selectedOptions.map((item) {
               return Container(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     (item.image ?? '').isNotEmpty
@@ -331,7 +386,15 @@ class ChatProvider extends ChangeNotifier {
                             height: 100,
                           )
                         : Container(),
-                    Text(item.text),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.text,
+                          style: GoogleFonts.arimo(fontWeight: FontWeight.w200, fontSize: 18, letterSpacing: 0.2, fontStyle: FontStyle.normal),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               );
@@ -340,33 +403,74 @@ class ChatProvider extends ChangeNotifier {
         );
 
       case QuestionType.slider:
-        return Text(response.userResponse ?? '');
+        return Text(
+          response.userResponse ?? '',
+          style: GoogleFonts.arimo(fontWeight: FontWeight.w200, fontSize: 18, letterSpacing: 0.2, fontStyle: FontStyle.normal),
+        );
 
       case QuestionType.numberSelector:
-        return Text(response.userResponse ?? '');
+        return Text(
+          response.userResponse ?? '',
+          style: GoogleFonts.arimo(fontWeight: FontWeight.w200, fontSize: 18, letterSpacing: 0.2, fontStyle: FontStyle.normal),
+        );
 
       case QuestionType.text:
-        return Text(response.userResponse ?? '');
+        return Text(
+          response.userResponse ?? '',
+          style: GoogleFonts.arimo(fontWeight: FontWeight.w200, fontSize: 18, letterSpacing: 0.2, fontStyle: FontStyle.normal),
+        );
       default:
         return Container();
     }
   }
-  ChallengeModel getReqModel(){
+
+  ChallengeModel getReqModel() {
     return _challengeModel;
   }
- late ChallengeModel _challengeModel;
+
+  void resetChallengeModel() {
+    // Clear all messages and reset indices
+    _messages.clear();
+    _currentQuestionIndex = 0;
+    _currentHairQuestionIndex = -1;
+    _currentMessageIndexInUi = 0;
+    _targetQuestionIndex = 0;
+    _editing = false;
+
+    // Reset user-provided data
+    _name = '';
+    _email = '';
+    _menstrualCycleTyp = '';
+    _pimplesStatus = '';
+    _weight = 0.0;
+    _height = 0.0;
+    _bmi = 0.0;
+    _userAnswer = null;
+
+    // Clear responses and answers
+    _userResponses.clear();
+    _answer.clear();
+
+    // Reinitialize the first question
+    if (questionList.isNotEmpty) {
+      addMessage(questionList[_currentQuestionIndex]);
+    }
+
+    notifyListeners(); // Notify listeners to update the UI
+  }
+
+  late ChallengeModel _challengeModel;
+
   Future<ChallengeResModel?> sendChallengeRequest() async {
-    const String url = 'https://api-dev.march.health/monomarch/api/v1/webhooks/on-sync-user-and-challenge';
+
+
+
+    const String url = 'https://api.march.health/monomarch/api/v1/webhooks/on-sync-user-and-challenge';
     ChallengeModel challengeModel = ChallengeModel(email: _email, challengeId: '66937d3d4884c6fe47c633e5', fullName: name);
     challengeModel.addQuestion(ChallengeQuestion(id: '669380aa4884c6fe47c63b31', answer: {'menstrualCycleType': menstrualCycleTyp}));
-    challengeModel.addQuestion(ChallengeQuestion(
-        id: '669388884884c6fe47c64b9f',
-        answer: _answer.map((data) {
-          return {"area": data.area, "severity": data.severity};
-        }).toList()));
+    challengeModel.addQuestion(ChallengeQuestion(id: '669388884884c6fe47c64b9f', answer: _answer.map((data) {return {"area": data.area, "severity": data.severity};}).toList()));
     challengeModel.addQuestion(ChallengeQuestion(id: '669388e04884c6fe47c64c53', answer: {'pimplesStatus': _pimplesStatus}));
     challengeModel.addQuestion(ChallengeQuestion(id: '6693893c4884c6fe47c64d25', answer: {'weight': _weight, 'height': _height, 'bmi': _bmi}));
-
     challengeModel.addQuestion(ChallengeQuestion(id: '669389724884c6fe47c64d89', answer: (_userAnswer ?? false) ? "YES" : "NO"));
 
     try {
@@ -381,7 +485,8 @@ class ChatProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         // Parse response JSON
-        _challengeModel=challengeModel;
+        _challengeModel = challengeModel;
+
         return ChallengeResModel.fromJson(json.decode(response.body));
       } else {
         print('Failed to send request: ${response.statusCode}');
@@ -392,6 +497,36 @@ class ChatProvider extends ChangeNotifier {
       return null;
     }
   }
+
+
+
+  ////send status
+
+
+  void callApi({required String questionId,required String question,required String answer,}) async {
+    final apiService = getIt<ApiService>();
+    final userService = getIt<UserService>();
+
+    String userId = await userService.getUserIdentifier(); // Get or create unique ID
+
+
+    bool success = await apiService.submitAnswer(
+      userIdentifier: userId,
+      challenge: 'PCOS',
+      questionId: questionId,
+      question: question,
+      answer: answer,
+    );
+
+    if (success) {
+      print("Answer submitted successfully!");
+    } else {
+      print("Failed to submit answer.");
+    }
+  }
+
+
+
 
   String get menstrualCycleTyp => _menstrualCycleTyp;
 
@@ -454,5 +589,52 @@ class ChatProvider extends ChangeNotifier {
   set currentHairQuestionIndex(int value) {
     _currentHairQuestionIndex = value;
     notifyListeners();
+  }
+
+  int calculateHairGrowth() {
+    HairAnswer upperLip = _answer.firstWhere(
+      (data) {
+        return data.area == 'Upper Lip';
+      },
+      orElse: () => HairAnswer('Upper Lip', 0),
+    );
+
+    HairAnswer chin = _answer.firstWhere(
+      (data) {
+        return data.area == 'Chin';
+      },
+      orElse: () => HairAnswer('Chin', 0),
+    );
+
+    HairAnswer lowerAbdomen = _answer.firstWhere(
+      (data) {
+        return data.area == 'Lower Abdomen';
+      },
+      orElse: () => HairAnswer('Lower Abdomen', 0),
+    );
+
+    HairAnswer thighs = _answer.firstWhere(
+      (data) {
+        return data.area == 'Thighs';
+      },
+      orElse: () => HairAnswer('Thighs', 0),
+    );
+    int totalScore = {
+      'Upper Lip': upperLip.severity,
+      'Chin': chin.severity,
+      'Lower Abdomen': lowerAbdomen.severity,
+      'Thighs': thighs.severity,
+    }.values.reduce((a, b) => a + b);
+
+    // Define thresholds
+    if (totalScore <= 4) {
+      return -1;
+    } else if (totalScore <= 8) {
+      return 0;
+    } else {
+      return 1;
+    }
+
+    // Show result
   }
 }

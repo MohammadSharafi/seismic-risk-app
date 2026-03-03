@@ -15,6 +15,7 @@ import {
   Calendar,
   Clock
 } from 'lucide-react';
+import { WearableDataCard } from './WearableDataCard';
 
 interface PatientFullRecordProps {
   patient: Patient;
@@ -363,7 +364,9 @@ export function PatientFullRecord({ patient, onBack }: PatientFullRecordProps) {
                     <div key={idx} className="flex items-start gap-2 text-sm text-gray-700">
                       <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
                       {med.medication_name || med.name || String(med)}
-                      {med.dose && <span className="text-gray-500"> - {med.dose}</span>}
+                      {med.dose && med.dose !== 'Unknown' && (
+                        <span className="text-gray-500"> - {med.dose}</span>
+                      )}
                     </div>
                   ))
                 ) : patient.medications && patient.medications.length > 0 ? (
@@ -399,6 +402,9 @@ export function PatientFullRecord({ patient, onBack }: PatientFullRecordProps) {
                 </div>
               </div>
             )}
+
+            {/* Wearable data – sync demo */}
+            <WearableDataCard patient={patient} />
           </div>
 
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
@@ -628,7 +634,7 @@ export function PatientFullRecord({ patient, onBack }: PatientFullRecordProps) {
                   </div>
                   <span className="text-xs text-gray-500">{alarm.timestamp}</span>
                 </div>
-                <p className="text-sm text-gray-900 font-medium mb-2">{alarm.description}</p>
+                <p className="text-sm text-gray-900 font-medium mb-2">{(alarm.description || '').replace(/\bRisk score\b/gi, 'Intervention Priority Score')}</p>
                 {alarm.acknowledgedBy && (
                   <div className="text-xs text-gray-600">
                     Acknowledged by {alarm.acknowledgedBy} at {alarm.acknowledgedAt}

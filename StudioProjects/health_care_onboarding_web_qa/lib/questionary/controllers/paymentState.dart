@@ -50,7 +50,7 @@ class PaymentState extends ChangeNotifier {
     try {
       final response = await http.get(
         Uri.parse(
-            'https://api-dev.march.health/monomarch/api/v1/stripe-services/get-checkout-session?paymentKey=EndoMasterCarePlanUser'),
+            'https://api.march.health/monomarch/api/v1/stripe-services/get-checkout-session?paymentKey=EndoMasterCarePlanUser'),
         headers: {"ngrok-skip-browser-warning": "69420"},
       );
 

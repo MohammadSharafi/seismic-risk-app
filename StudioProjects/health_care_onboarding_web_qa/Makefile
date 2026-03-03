@@ -14,13 +14,6 @@ deploy-web:
 
 	@echo "Building for web..."
 	flutter build web --base-href $(BASE_HREF) --release
-#endomastercare.march-health.com
-#	@echo "Creating CNAME file..."
-#	echo "$(CUSTOM_DOMAIN)" > build/web/CNAME
-	@echo "PUSH & COMMIT"
-	git add . && \
-	git commit -m "Deploy Version $(BUILD_VERSION)" && \
-	git push -u --force origin main
 
 
 	@echo "Deploying to git repository"
@@ -36,3 +29,5 @@ deploy-web:
 	@echo "🟢 Finished Deploy"
 
 .PHONY: deploy-web
+
+

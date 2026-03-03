@@ -37,7 +37,7 @@ class SurveyPage extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => SurveyState(surveyData),
+          create: (_) => SurveyState(surveyData()),
         ),
       ],
       child: Consumer<SurveyState>(
@@ -149,18 +149,16 @@ class SurveyPage extends StatelessWidget {
                     btnCallBack: () async {
                       SharedPreferences prefs = await SharedPreferences.getInstance();
 
-
                       int? age = prefs.getInt('STEP_2');
 
                       if (age != null && age < 18) {
                         // Add your logic here
                         AutoRouter.of(context).replace(const UnderEighteenRoute());
                       } else {
-                        if (surveyState.currentPage <
-                            surveyState.pages.length - 1) {
-                          surveyState.nextPage();
+                        if (surveyState.currentPage < surveyState.pages.length - 1) {surveyState.nextPage();
                         }
                       }
+                      surveyState.sendDataToServer();
                     },
                     buttonSize: ButtonSize.LARG,
                     alignment: Alignment.center,
@@ -170,6 +168,8 @@ class SurveyPage extends StatelessWidget {
                     btnCallBack: () async {
                       QuestionaryReqModel questionaryReqModel = surveyState.submitSurvey();
                       await questionaryRepository.add(questionaryReqModel);
+                      surveyState.sendDataToServer();
+
                       AutoRouter.of(context).replace(const ConsentRoute());
                     },
                     buttonSize: ButtonSize.LARG,
@@ -290,7 +290,7 @@ class SurveyPage extends StatelessWidget {
   }
 
   bool isValidEmail(SurveyState surveyState) {
-    bool  isEmail = ((surveyData.where((item) => item is SurveyPageData).cast<SurveyPageData>().toList()[surveyState.myCurrentPageIndex].hintList)??['']).first!.toLowerCase().contains('email');
+    bool  isEmail = ((surveyData().where((item) => item is SurveyPageData).cast<SurveyPageData>().toList()[surveyState.myCurrentPageIndex].hintList)??['']).first!.toLowerCase().contains('email');
     if(!isEmail) {
       return true;
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../controllers/question_controller.dart';
 import '../../../models/Questions.dart';
 import 'package:provider/provider.dart';
@@ -93,10 +94,10 @@ class QuestionCard extends StatelessWidget {
       case QuestionType.numberField:
         return TextField(
           keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: (value) => context.read<QuizProvider>().selectAnswer(value),
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'Your Answer',
           ),
         );
       case QuestionType.periodCalendar:

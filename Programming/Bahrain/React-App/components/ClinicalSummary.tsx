@@ -202,16 +202,18 @@ export function ClinicalSummary({ patient, onViewFullSummary }: ClinicalSummaryP
           detailedConditions.slice(0, expandedConditions ? detailedConditions.length : 3).map((condition, idx) => (
           <div key={idx}>
             {!expandedConditions ? (
-              // Collapsed view - simple
+              // Collapsed view - simple (don't show "Unknown" in name)
               <div className="flex items-start gap-2 text-sm text-gray-700">
                 <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                {condition.name}
+                {condition.name === 'Unknown Condition' ? 'Condition' : condition.name}
               </div>
             ) : (
               // Expanded view - detailed
               <div className="p-3 bg-purple-50 border border-purple-100 rounded-lg">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="font-medium text-gray-900 text-sm">{condition.name}</div>
+                  <div className="font-medium text-gray-900 text-sm">
+                    {condition.name === 'Unknown Condition' ? 'Condition' : condition.name}
+                  </div>
                   <span className={`text-xs px-2 py-0.5 rounded font-medium ${
                     condition.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
                   }`}>
@@ -219,8 +221,10 @@ export function ClinicalSummary({ patient, onViewFullSummary }: ClinicalSummaryP
                   </span>
                 </div>
                 <div className="space-y-1 text-xs text-gray-600">
-                  <div><span className="font-medium">Onset:</span> {condition.onsetDate}</div>
-                  {condition.source && (
+                  {(condition.onsetDate && condition.onsetDate !== 'Unknown') && (
+                    <div><span className="font-medium">Onset:</span> {condition.onsetDate}</div>
+                  )}
+                  {condition.source && condition.source !== 'Unknown' && (
                     <div><span className="font-medium">Source:</span> {condition.source}</div>
                   )}
                 </div>
@@ -268,18 +272,22 @@ export function ClinicalSummary({ patient, onViewFullSummary }: ClinicalSummaryP
           detailedMedications.map((med, idx) => (
           <div key={idx}>
             {!expandedMedications ? (
-              // Collapsed view - simple
+              // Collapsed view - simple (don't show "Unknown" for dose)
               <div className="flex items-start gap-2 text-sm text-gray-700">
                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                {med.name} {med.dose}
+                {(med.name === 'Unknown Medication' ? 'Medication' : med.name)}{med.dose && med.dose !== 'Unknown' ? ` ${med.dose}` : ''}
               </div>
             ) : (
-              // Expanded view - detailed
+              // Expanded view - detailed (don't show "Unknown", use — or omit)
               <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <div className="font-medium text-gray-900 text-sm">{med.name}</div>
-                    <div className="text-xs text-gray-600">{med.dose}</div>
+                    <div className="font-medium text-gray-900 text-sm">
+                      {med.name === 'Unknown Medication' ? 'Medication' : med.name}
+                    </div>
+                    {med.dose && med.dose !== 'Unknown' && (
+                      <div className="text-xs text-gray-600">{med.dose}</div>
+                    )}
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded font-medium ${
                     med.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
@@ -288,8 +296,12 @@ export function ClinicalSummary({ patient, onViewFullSummary }: ClinicalSummaryP
                   </span>
                 </div>
                 <div className="space-y-1 text-xs text-gray-600">
-                  <div><span className="font-medium">Started:</span> {med.startDate}</div>
-                  <div><span className="font-medium">Prescribed by:</span> {med.prescribingSource}</div>
+                  {(med.startDate && med.startDate !== 'Unknown') && (
+                    <div><span className="font-medium">Started:</span> {med.startDate}</div>
+                  )}
+                  {(med.prescribingSource && med.prescribingSource !== 'Unknown') && (
+                    <div><span className="font-medium">Prescribed by:</span> {med.prescribingSource}</div>
+                  )}
                   {med.lastReviewed && (
                     <div className="text-blue-700 mt-1">
                       <span className="font-medium">Last reviewed:</span> {med.lastReviewed}

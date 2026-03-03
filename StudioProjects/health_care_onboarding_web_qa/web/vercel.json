@@ -1,7 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/success", "destination": "/index.html" },
-    { "source": "/cancel", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}

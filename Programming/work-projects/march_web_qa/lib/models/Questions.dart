@@ -5,11 +5,12 @@ class Question {
   final int? answerIndex;
   final String? question;
   final String? hint;
+  final String? tag;
   final String? description;
   final List<String>? options;
   final QuestionType type;
 
-  Question({this.id, this.question, this.hint, this.answerIndex, this.options, required this.type, required this.description});
+  Question( {this.id, this.question, this.hint, this.answerIndex, this.options, required this.type, required this.description,this.tag});
 }
 
 const List<Map<String, dynamic>> sample_data = [
@@ -19,6 +20,7 @@ const List<Map<String, dynamic>> sample_data = [
     "description": "✏️ Your first name helps us personalize your experience!",
     "type": "textField",
     "hint": "Your Name",
+    "tag": "USER_NAME"
   },
 
   {
@@ -38,6 +40,8 @@ const List<Map<String, dynamic>> sample_data = [
       'Trouble focusing',
     ],
     "type": "multipleChoice",
+    "tag": "SYMPTOMS_TODAY"
+
   },
 
   {
@@ -45,12 +49,16 @@ const List<Map<String, dynamic>> sample_data = [
     "question": "Let’s go a bit deeper!🩸 Do you currently track your menstrual cycle, symptoms, or lifestyle habits?",
     "options": ['Yes', 'No', 'I used to but stopped'],
     "type": "singleChoice",
+    "tag":"TRACKING_CYCLE"
+
   },
   {
     "id": '67d3e82d081597b4b305724e',
     "question": "📆 To personalize your plan, when did your last period start?",
     "description": "🩸 Select the first day of your last period. If you're unsure, choose the closest approximate date.",
     "type": "periodCalendar",
+    "tag":"LAST_PERIOD_START"
+
   },
   {
     "id": '67d3e82d081597b4b305724f',
@@ -58,6 +66,8 @@ const List<Map<String, dynamic>> sample_data = [
     "description": "",
     "options": ['Less than 21 days', '21-24 days', '25-28 days', '29-35 days', 'More than 35 days'],
     "type": "singleChoice",
+    "tag":"CYCLE_LENGTH"
+
   },
 
   {
@@ -65,6 +75,8 @@ const List<Map<String, dynamic>> sample_data = [
     "question": "How many days does your period usually last?",
     "description": "",
     "type": "numberField",
+    "tag":"PERIOD_LENGTH"
+
   },
   {
     "id": '67d3e82d081597b4b3057251',
@@ -72,12 +84,16 @@ const List<Map<String, dynamic>> sample_data = [
     "description": " 📌 If you're unsure, no worries! We'll help you track it better. ",
     "options": ['Yes, my cycle is regular', 'Mostly regular, but sometimes varies', 'No, my cycle is irregular', 'I’m not sure'],
     "type": "singleChoice",
+    "tag":"CYCLE_REGULARITY"
+
   },
   {
     "id": '',
     "question": "⚡ How severe is your period pain usually? (Scale: 1-10)",
     "description": "😌 1 - Barely noticeable | 10 - Extremely painful",
     "type": "slider",
+    "tag":"PERIOD_PAIN_LEVEL"
+
   },
 
   {
@@ -85,6 +101,8 @@ const List<Map<String, dynamic>> sample_data = [
     "question": "😣 Do you experience cramps even when you're not on your period?",
     "options": ['Yes', 'No', 'Sometimes'],
     "type": "singleChoice",
+    "tag":"CRAMPS_OUTSIDE_PERIOD"
+
   },
 
   {
@@ -93,12 +111,16 @@ const List<Map<String, dynamic>> sample_data = [
     "description": "",
     "options": ['Endometriosis', 'PCOS', 'Chronic pelvic pain', 'Infertility', 'Premature ovarian insufficiency', 'Adenomyosis', 'Prefer not to say'],
     "type": "multipleChoice",
+    "tag":"DIAGNOSED_CONDITIONS"
+
   },
   {
     "id": '67d3e82d081597b4b3057255',
     "question": "🎂 When were you born?",
     "description": "📍 Knowing your age helps us tailor recommendations to your unique needs.",
     "type": "calendar",
+    "tag":"DATE_OF_BIRTH"
+
   },
   {
     "id": '',
@@ -106,10 +128,12 @@ const List<Map<String, dynamic>> sample_data = [
     "description": " Your journey matters. Whether you’re planning, expecting, or just tracking.",
     "options": ['Yes, I’m pregnant', 'No, I’m not pregnant', 'I’m trying to conceive', 'I’m not sure'],
     "type": "singleChoice",
+    "tag":"PREGNANCY_STATUS"
+
   },
 
   {
-    "id": '',
+    "id": 'marketing',
     "question": "🏆 What are your main health goals?",
     "options": [
       'Find relief from pain and manage symptoms',
@@ -123,16 +147,20 @@ const List<Map<String, dynamic>> sample_data = [
       'Personalized supplement & lifestyle guidance'
     ],
     "type": "multipleChoice",
+    "tag":"HEALTH_GOALS"
+
   },
   {
-    "id": '',
+    "id": 'marketing',
     "question": "✨ Almost there! We're generating your personalized plan. Just one more thing. Have you used March Health before? ",
     "options": ['Yes', 'No'],
     "type": "singleChoice",
+    "tag":"USED_MARCH_HEALTH"
+
   },
 
   {
-    "id": '',
+    "id": 'marketing',
     "question": "🔎 Where did you hear about March Health?",
     "options": [
       'Friend or family recommendation',
@@ -150,11 +178,13 @@ const List<Map<String, dynamic>> sample_data = [
       'Other'
     ],
     "type": "multipleChoice",
+    "tag":"HEARD_ABOUT_MARCH_HEALTH"
+
   },
 
 
   {
-    "id": '',
+    "id": 'marketing',
     "question": "📣 How do you want March Health to support you?",
     "options": [
       'Personalized health recommendations',
@@ -164,14 +194,18 @@ const List<Map<String, dynamic>> sample_data = [
       'Expert-led support & community'
     ],
     "type": "multipleChoice",
+    "tag":"SUPPORT_PREFERENCES"
+
   },
 
   {
-    "id": 'email',
+    "id": '',
     "question": "📧 Your personalized health plan is ready! 🎉 Enter your email to create your March Health account and access your customized insights.",
     "description": "🔒 Your account will be securely created with this email, make sure it's correct!",
 
     "type": "textField",
+    "tag":"USER_EMAIL"
+
   },
 
 
@@ -184,6 +218,7 @@ List<Question> parseQuestions(List<Map<String, dynamic>> data) {
       id: question['id'],
       question: question['question'],
       hint: question['hint'],
+      tag: question['tag'],
       answerIndex: question['answer_index'],
       options: question['options'] != null ? List<String>.from(question['options']) : null,
       type: QuestionType.values.firstWhere((e) => e.toString() == 'QuestionType.${question['type']}'),

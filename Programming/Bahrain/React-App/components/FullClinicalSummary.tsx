@@ -289,9 +289,9 @@ export function FullClinicalSummary({ patient, onBack }: FullClinicalSummaryProp
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className={`font-medium mb-1 ${condition.status === 'Active' ? 'text-gray-900' : 'text-gray-700'}`}>
-                            {condition.name}
+                            {condition.name === 'Unknown Condition' ? 'Condition' : condition.name}
                           </div>
-                          {condition.severity && (
+                          {condition.severity && condition.severity !== 'Unknown' && (
                             <div className="text-sm text-gray-600">{condition.severity}</div>
                           )}
                         </div>
@@ -303,12 +303,14 @@ export function FullClinicalSummary({ patient, onBack }: FullClinicalSummaryProp
                           {condition.status}
                         </span>
                       </div>
-                      <div className={`grid gap-4 text-sm ${condition.source ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                        <div>
-                          <span className="text-gray-500">Onset:</span>
-                          <span className="ml-2 text-gray-900">{condition.onsetDate}</span>
-                        </div>
-                        {condition.source && (
+                      <div className={`grid gap-4 text-sm ${(condition.source && condition.source !== 'Unknown') ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        {condition.onsetDate && condition.onsetDate !== 'Unknown' && (
+                          <div>
+                            <span className="text-gray-500">Onset:</span>
+                            <span className="ml-2 text-gray-900">{condition.onsetDate}</span>
+                          </div>
+                        )}
+                        {condition.source && condition.source !== 'Unknown' && (
                           <div>
                             <span className="text-gray-500">Source:</span>
                             <span className="ml-2 text-gray-900">{condition.source}</span>
@@ -346,24 +348,34 @@ export function FullClinicalSummary({ patient, onBack }: FullClinicalSummaryProp
                     <div key={idx} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <div className="font-medium text-gray-900 mb-1">{med.name}</div>
-                          <div className="text-sm text-gray-600">
-                            {med.dose} {med.frequency}
+                          <div className="font-medium text-gray-900 mb-1">
+                            {med.name === 'Unknown Medication' ? 'Medication' : med.name}
                           </div>
+                          {(med.dose !== 'Unknown' || (med.frequency && med.frequency.toLowerCase() !== 'unknown')) && (
+                            <div className="text-sm text-gray-600">
+                              {med.dose !== 'Unknown' && med.dose}
+                              {med.dose !== 'Unknown' && med.frequency && med.frequency.toLowerCase() !== 'unknown' ? ' ' : ''}
+                              {med.frequency && med.frequency.toLowerCase() !== 'unknown' ? med.frequency : ''}
+                            </div>
+                          )}
                         </div>
                         <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                           {med.status}
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-500">Started:</span>
-                          <span className="ml-2 text-gray-900">{med.startDate}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Prescribed by:</span>
-                          <span className="ml-2 text-gray-900">{med.prescribingSource}</span>
-                        </div>
+                        {med.startDate && med.startDate !== 'Unknown' && (
+                          <div>
+                            <span className="text-gray-500">Started:</span>
+                            <span className="ml-2 text-gray-900">{med.startDate}</span>
+                          </div>
+                        )}
+                        {med.prescribingSource && med.prescribingSource !== 'Unknown' && (
+                          <div>
+                            <span className="text-gray-500">Prescribed by:</span>
+                            <span className="ml-2 text-gray-900">{med.prescribingSource}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     ))}
@@ -384,28 +396,40 @@ export function FullClinicalSummary({ patient, onBack }: FullClinicalSummaryProp
                     <div key={idx} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <div className="font-medium text-gray-700 mb-1">{med.name}</div>
-                          <div className="text-sm text-gray-600">
-                            {med.dose} {med.frequency}
+                          <div className="font-medium text-gray-700 mb-1">
+                            {med.name === 'Unknown Medication' ? 'Medication' : med.name}
                           </div>
+                          {(med.dose !== 'Unknown' || (med.frequency && med.frequency.toLowerCase() !== 'unknown')) && (
+                            <div className="text-sm text-gray-600">
+                              {med.dose !== 'Unknown' && med.dose}
+                              {med.dose !== 'Unknown' && med.frequency && med.frequency.toLowerCase() !== 'unknown' ? ' ' : ''}
+                              {med.frequency && med.frequency.toLowerCase() !== 'unknown' ? med.frequency : ''}
+                            </div>
+                          )}
                         </div>
                         <span className="px-3 py-1 bg-gray-200 text-gray-600 rounded-full text-xs font-medium">
                           {med.status}
                         </span>
                       </div>
                       <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-500">Started:</span>
-                          <span className="ml-2 text-gray-900">{med.startDate}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Stopped:</span>
-                          <span className="ml-2 text-gray-900">{med.endDate}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Prescribed by:</span>
-                          <span className="ml-2 text-gray-900">{med.prescribingSource}</span>
-                        </div>
+                        {med.startDate && med.startDate !== 'Unknown' && (
+                          <div>
+                            <span className="text-gray-500">Started:</span>
+                            <span className="ml-2 text-gray-900">{med.startDate}</span>
+                          </div>
+                        )}
+                        {med.endDate && med.endDate !== 'Unknown' && (
+                          <div>
+                            <span className="text-gray-500">Stopped:</span>
+                            <span className="ml-2 text-gray-900">{med.endDate}</span>
+                          </div>
+                        )}
+                        {med.prescribingSource && med.prescribingSource !== 'Unknown' && (
+                          <div>
+                            <span className="text-gray-500">Prescribed by:</span>
+                            <span className="ml-2 text-gray-900">{med.prescribingSource}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     ))}

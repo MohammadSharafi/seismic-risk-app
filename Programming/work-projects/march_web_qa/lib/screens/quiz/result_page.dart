@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'dart:html' as html;
 
 class ResultsPage extends StatelessWidget {
   const ResultsPage({super.key});
@@ -26,13 +27,14 @@ class ResultsPage extends StatelessWidget {
                     '🚀 Your account is now created & customized! Start tracking your cycle, symptoms, and receive personalized health recommendations in the March Health.\n'
                     '🎁 Enjoy 3 months of free access to premium features as our welcome gift 💙\n'
                     '🎉 Expert insights, advanced tracking, and personalized care are now unlocked just for you!',
-                textAlign: TextAlign.start,
+                textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   const url = 'https://marchapp.app.link/7QkeYUYJHRb';
+                  html.window.open(url, 'March');
 
                 },
                 style: ElevatedButton.styleFrom(

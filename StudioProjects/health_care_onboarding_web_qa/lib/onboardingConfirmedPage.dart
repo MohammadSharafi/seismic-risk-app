@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'VideoPlayerWidget.dart';
+import 'dart:html' as html;
 
 @RoutePage()
 class OnboardingConfirmedPage extends StatelessWidget {
@@ -23,7 +25,7 @@ class OnboardingConfirmedPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-               Text(
+              Text(
                 "YOU'RE ALL SET",
                 style: GoogleFonts.montserrat(
                   fontStyle: FontStyle.italic,
@@ -38,72 +40,76 @@ class OnboardingConfirmedPage extends StatelessWidget {
                 height: 120,
               ),
               const SizedBox(height: 24),
-               Text(
+              Text(
                 'Your Onboarding Session is Confirmed!',
                 style: GoogleFonts.nunito(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                   color: Colors.black,
                 ),
-                 textAlign: TextAlign.start,
+                textAlign: TextAlign.start,
               ),
               const SizedBox(height: 12),
-               Text(
-                'You are one step closer to beginning your journey with the Endometriosis Master Care Plan.\n\n'
-                    'We are excited to meet you at your onboarding session, where we will help you get started with personalized support. '
-                    'You will receive a confirmation email with your session details shortly.',
+              Text(
+'''
+You’re one step closer to beginning your journey with the Endometriosis Master Care Plan.
+Your onboarding session is the first and most important step in your program.
+In this session, we will guide you through everything you need to know to feel fully prepared, including how the plan works, what to expect, and how to get the most out of your personalized care.
+
+We are excited to meet you and support you from the very beginning.
+A confirmation email with your session details is on its way.''',
                 style: GoogleFonts.nunito(fontSize: 14, color: Colors.black87),
                 textAlign: TextAlign.start,
               ),
-              const SizedBox(height: 24),
-               Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Next Step',
-                  style: GoogleFonts.nunito(fontWeight: FontWeight.w700, fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 8),
-               Text(
-                'Before your session, take a moment to watch our walkthrough video.\n\n'
-                    'It will show you how to set up your profile, track your symptoms, and get the most out of your care plan.\n\n'
-                    'It is a simple way to feel prepared and confident as you begin.',
-                style: GoogleFonts.nunito(fontSize: 14),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(child: Text("Walkthrough Video Placeholder")),
-              ),
-              const SizedBox(height: 32),
-               Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Next, Get Ready\nDownload March Health',
-                  style: GoogleFonts.nunito(fontWeight: FontWeight.w700, fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 8),
-               Text(
-                'To start your journey, download the March Health.\n'
-                    'It is where you will track your symptoms, access personalized insights powered by AI, and connect with a community that truly understands.\n'
-                    'Let’s get you set up and moving forward with care and confidence.',
-                style: GoogleFonts.nunito(fontSize: 14),
-              ),
-              const SizedBox(height: 16),
-              MarchButton(btnText: 'Download March Health', btnCallBack: (){}, buttonSize: ButtonSize.INFINITY, alignment: Alignment.center),
-
-              const SizedBox(height: 24),
-              Image.asset(
-                MarchIcons.qrCode,// Replace with your actual QR image asset
-                height: 120,
-              ),
-              const SizedBox(height: 24),
+              // const SizedBox(height: 24),
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     'Next Step',
+              //     style: GoogleFonts.nunito(
+              //         fontWeight: FontWeight.w700, fontSize: 16),
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+              // Text(
+              //   'Before your session, take a moment to watch our walkthrough video.\n\n'
+              //   'It will show you how to set up your profile, track your symptoms, and get the most out of your care plan.\n\n'
+              //   'It is a simple way to feel prepared and confident as you begin.',
+              //   style: GoogleFonts.nunito(fontSize: 14),
+              // ),
+              // const SizedBox(height: 24),
+              // const VideoPlayerWidget(),
+              // const SizedBox(height: 32),
+              // Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     'Next, Get Ready\nDownload March Health',
+              //     style: GoogleFonts.nunito(
+              //         fontWeight: FontWeight.w700, fontSize: 16),
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+              // Text(
+              //   'To start your journey, download the March Health.\n'
+              //   'It is where you will track your symptoms, access personalized insights powered by AI, and connect with a community that truly understands.\n'
+              //   'Let’s get you set up and moving forward with care and confidence.',
+              //   style: GoogleFonts.nunito(fontSize: 14),
+              // ),
+              // const SizedBox(height: 16),
+              // MarchButton(
+              //     btnText: 'Download March Health',
+              //     btnCallBack: () {
+              //       html.window.open(
+              //           'https://marchapp.app.link/nuA3gDh7VSb', '_blank');
+              //     },
+              //     buttonSize: ButtonSize.INFINITY,
+              //     alignment: Alignment.center),
+              // const SizedBox(height: 24),
+              // Image.asset(
+              //   MarchIcons.qrCode, // Replace with your actual QR image asset
+              //   height: 120,
+              // ),
+              // const SizedBox(height: 24),
             ],
           ),
         ),

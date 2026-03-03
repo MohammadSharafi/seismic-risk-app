@@ -22,23 +22,7 @@ class NoEndoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: 0,
-          child: IgnorePointer(
-            ignoring: true,
-            child: Container(
-              color: Colors.white,
-              child: Image.asset(MarchIcons.hands,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter),
-            ),
-          ),
-        ),
+
         Scaffold(
           backgroundColor: Colors.white,
           body: SafeArea(
@@ -54,7 +38,7 @@ class NoEndoPage extends StatelessWidget {
                   Spacer(),
 
                    Text(
-                    'Thank you for sharing your story with us. Right now, the Endometriosis Master Care Plan is designed for those with a confirmed diagnosis.\n\n'
+                        'Thank you for sharing your story with us. Right now, the Endometriosis Master Care Plan is designed for those with a confirmed diagnosis.\n\n'
                         'But your journey matters just as much, and we are here for you.\n'
                         'The March Health app can help you track your symptoms, find patterns, and feel more prepared when speaking with doctors.\n\n'
                         'To support you, we are offering 50% off your first year on the app.\n'
@@ -86,6 +70,14 @@ class NoEndoPage extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+        IgnorePointer(
+          ignoring: true,
+          child: Image.asset(MarchIcons.hands,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
           ),
         ),
 

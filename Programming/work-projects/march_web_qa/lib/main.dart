@@ -1,25 +1,49 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:march_web_qa/screens/quiz/question_page.dart';
 import 'package:march_web_qa/screens/quiz/welcome_page.dart';
 import 'package:provider/provider.dart';
 import 'package:device_preview/device_preview.dart';
-
+import 'controllers/injection.dart';
 import 'controllers/question_controller.dart';
 import 'models/Questions.dart';
 
+
+
+
+
 void main() {
+
+  configureDependencies(); // Initialize dependencies
+
   runApp(
-    DevicePreview(
+    shouldEnableDevicePreview()
+        ? DevicePreview(
       enabled: true,
       isToolbarVisible: false,
-      builder: (context) =>  MultiProvider(
+      builder: (context) => MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => QuizProvider()),
         ],
         child: const QuizApp(),
       ),
+    )
+        : MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => QuizProvider()),
+      ],
+      child: const QuizApp(),
     ),
   );
+}
+
+
+
+
+
+bool shouldEnableDevicePreview() {
+  // Enable DevicePreview only if running on the web or a desktop platform
+  return kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 }
 
 class QuizApp extends StatelessWidget {

@@ -11,7 +11,7 @@ import '../../march_style/march_size.dart';
 import 'Questions.dart';
 import 'info.dart';
 
-final surveyData = [
+List<dynamic> surveyData({bool? haveEndo}) => [
 
 
   SurveyPageData(
@@ -66,7 +66,7 @@ final surveyData = [
       },
       buttonCallBack: () async {
         SharedPreferences prefs =await  SharedPreferences.getInstance();
-        prefs.setBool('allow_collect_data',false);
+        prefs.setBool('allow_collect_data',true);
       },
       child: Stack(
         children: [
@@ -127,7 +127,7 @@ final surveyData = [
 
 
   ///////////////////
-  SurveyPageData(
+  ((haveEndo??true) == true)?SurveyPageData(
     questionList: ['How long have you been diagnosed with endometriosis?'],
     descriptionList: ['This helps us understand your journey better.'],
     questionTypeList: [
@@ -139,6 +139,22 @@ final surveyData = [
         '6 months–1 year': '6 months–1 year',
         '1–5 years': '1–5 years',
         'More than 5 years': 'More than 5 years'
+      }
+    ],
+    listOfTags: ['STEP_4'],
+    hintList: [''],
+    GridItemLists: [null],
+    image: [null],
+  ):SurveyPageData(
+    questionList: ['Have you been referred to a specialist, such as a gynecologist, for symptoms potentially related to endometriosis?'],
+    descriptionList: ['This helps us guide you toward proactive health management.'],
+    questionTypeList: [
+      QuestionType.singleChoice,
+    ],
+    listOfOptions: [
+      {
+        'Yes': 'Yes',
+        'No': 'No',
       }
     ],
     listOfTags: ['STEP_4'],
