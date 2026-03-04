@@ -5,12 +5,12 @@ jwt_private_key.pem
 jwt_public_key.pem
 
 # Env (keep .env.example)
-web/.env
-web/.env.dev
-web/.env.development
-web/.env.prod
-web/.env.production
-web/.env.staging
+MarchAgent/web/.env
+MarchAgent/web/.env.dev
+MarchAgent/web/.env.development
+MarchAgent/web/.env.prod
+MarchAgent/web/.env.production
+MarchAgent/web/.env.staging
 
 # Python
 __pycache__/

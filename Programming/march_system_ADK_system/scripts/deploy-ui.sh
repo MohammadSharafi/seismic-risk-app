@@ -4,7 +4,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WEB_DIR="$(cd "$SCRIPT_DIR/../web" && pwd)"
+WEB_DIR="$(cd "$SCRIPT_DIR/../MarchAgent/web" && pwd)"
 ENV="${1:-all}"
 AWS_ACCOUNT="533267377472"
 AWS_REGION="us-east-1"
