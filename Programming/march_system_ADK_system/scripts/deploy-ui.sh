@@ -41,8 +41,15 @@ deploy_env() {
     --index-document index.html \
     --error-document index.html
 
-  echo "==> Syncing dist/ to s3://$bucket"
-  aws s3 sync dist/ "s3://$bucket" --delete
+  echo "==> Syncing versioned assets to s3://$bucket"
+  aws s3 sync dist/ "s3://$bucket" --delete \
+    --exclude "index.html" \
+    --cache-control "public,max-age=31536000,immutable"
+
+  echo "==> Uploading index.html with no-cache"
+  aws s3 cp dist/index.html "s3://$bucket/index.html" \
+    --cache-control "no-cache,no-store,must-revalidate" \
+    --content-type "text/html; charset=utf-8"
 
   echo "==> $env deployed: http://${bucket}.s3-website-${AWS_REGION}.amazonaws.com/"
 }
