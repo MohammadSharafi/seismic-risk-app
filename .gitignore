@@ -43,3 +43,6 @@ ml-service/.venv/
 
 # Docker
 *.log
+
+# Local machine folders accidentally tracked from the home directory repo root
+/Programming/
